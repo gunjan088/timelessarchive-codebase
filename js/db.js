@@ -93,6 +93,11 @@ export async function getUniqueCuisines() {
     return [...new Set(data.map(r => r.cuisine_type).filter(Boolean))].sort()
 }
 
+export async function deleteReview(id) {
+    const { error } = await supabase.from('reviews').delete().eq('id', id)
+    if (error) throw error
+}
+
 export function subscribeToReviews(callback) {
     return supabase
         .channel('reviews-feed')
