@@ -16,15 +16,19 @@
             <input id="email" type="email" placeholder="Email" class="w-full mb-2 p-2 border rounded">
             <input id="password" type="password" placeholder="Password" class="w-full mb-2 p-2 border rounded">
             <div class="flex gap-2">
-                <button id="signup-btn" class="bg-gray-200 px-4 py-2 rounded font-semibold w-1/2">Sign Up</button>
-                <button id="login-btn" class="bg-blue-600 text-white px-4 py-2 rounded font-semibold w-1/2">Log In</button>
+                <button id="login-btn" class="bg-blue-600 text-white px-4 py-2 rounded font-semibold w-full">Log In</button>
             </div>
             <p id="auth-msg" class="text-sm text-red-500 mt-2 hidden"></p>
         </div>
 
         <div id="app-section" class="hidden mb-6 pb-6 border-b">
             <h2 class="text-lg font-semibold mb-2">Add a Spot</h2>
-            <input id="restaurant-name" type="text" placeholder="Restaurant Name (e.g., Meghana Foods)" class="w-full mb-2 p-2 border rounded">
+            
+            <div class="relative w-full mb-2">
+                <input id="restaurant-search" type="text" placeholder="Search for a restaurant (e.g. Meghana)..." class="w-full p-2 border rounded border-blue-400 shadow-sm" autocomplete="off">
+                <ul id="search-results" class="absolute bg-white border w-full mt-1 rounded shadow-lg hidden z-10 max-h-48 overflow-y-auto"></ul>
+            </div>
+            
             <input id="dish-name" type="text" placeholder="What did you order?" class="w-full mb-2 p-2 border rounded">
             
             <select id="rating" class="w-full mb-4 p-2 border rounded">
@@ -48,20 +52,83 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-        // 🛑 PASTE YOUR KEYS HERE 🛑
+        // 🛑 YOUR KEYS ARE NOW LIVE HERE 🛑
         const supabaseUrl = 'https://eyhcwmccjkvcpfbkbpea.supabase.co'
         const supabaseKey = 'sb_publishable_bBAzEQACxjmRwd7IqCLEvQ_eLzlOGAM'
         const supabase = createClient(supabaseUrl, supabaseKey)
 
         let currentUser = null;
+        let selectedPlace = null; 
 
         // UI Elements
         const authSection = document.getElementById('auth-section');
         const appSection = document.getElementById('app-section');
         const authMsg = document.getElementById('auth-msg');
         const reviewsList = document.getElementById('reviews-list');
+        const searchInput = document.getElementById('restaurant-search');
+        const searchResults = document.getElementById('search-results');
 
-        // 1. Check if user is already logged in
+        // --- OPENSTREETMAP SEARCH LOGIC ---
+        let timeout = null;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(timeout);
+            const query = e.target.value;
+            
+            // Wait until they type at least 3 letters
+            if(query.length < 3) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            // Wait 0.5 seconds after they stop typing before searching
+            timeout = setTimeout(async () => {
+                try {
+                    // Appending "Bangalore" to force local results
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' Bangalore')}&limit=5`);
+                    const data = await res.json();
+                    
+                    searchResults.innerHTML = '';
+                    if(data.length > 0) {
+                        searchResults.classList.remove('hidden');
+                        data.forEach(place => {
+                            const li = document.createElement('li');
+                            li.className = 'p-2 border-b hover:bg-gray-100 cursor-pointer text-sm text-gray-700';
+                            
+                            // Clean up the name for display
+                            const shortName = place.name || place.display_name.split(',')[0];
+                            li.innerHTML = `<strong>${shortName}</strong><br><span class="text-xs text-gray-500">${place.display_name}</span>`;
+                            
+                            // What happens when you click a result
+                            li.onclick = () => {
+                                searchInput.value = shortName;
+                                selectedPlace = {
+                                    name: shortName,
+                                    address: place.display_name,
+                                    // Generate a Google Maps link using the GPS coordinates
+                                    url: `http://maps.google.com/maps?q=${place.lat},${place.lon}`
+                                };
+                                searchResults.classList.add('hidden');
+                            };
+                            searchResults.appendChild(li);
+                        });
+                    } else {
+                        searchResults.innerHTML = '<li class="p-2 text-sm text-gray-500">No places found. Try another name.</li>';
+                        searchResults.classList.remove('hidden');
+                    }
+                } catch (err) {
+                    console.error("Search failed:", err);
+                }
+            }, 500); 
+        });
+
+        // Hide dropdown if you click somewhere else on the page
+        document.addEventListener('click', (e) => {
+            if (e.target !== searchInput && e.target !== searchResults) {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // --- AUTH SETUP ---
         async function checkUser() {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
@@ -72,15 +139,6 @@
             fetchReviews();
         }
 
-        // 2. Auth Buttons
-        document.getElementById('signup-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { data, error } = await supabase.auth.signUp({ email, password });
-            if (error) { authMsg.textContent = error.message; authMsg.classList.remove('hidden'); } 
-            else { checkUser(); }
-        });
-
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -89,23 +147,27 @@
             else { checkUser(); }
         });
 
-        // 3. Submit Review
+        // --- SUBMIT REVIEW ---
         document.getElementById('submit-btn').addEventListener('click', async () => {
-            const restaurantName = document.getElementById('restaurant-name').value;
             const dishName = document.getElementById('dish-name').value;
             const rating = document.getElementById('rating').value;
 
-            if(!restaurantName || !dishName) return alert("Fill in all fields!");
+            if(!selectedPlace) return alert("Please select a restaurant from the dropdown list!");
+            if(!dishName) return alert("What did you order?");
 
-            // First, save the restaurant
+            // Save restaurant to Supabase
             const { data: restData, error: restError } = await supabase
                 .from('restaurants')
-                .insert([{ name: restaurantName }])
+                .insert([{ 
+                    name: selectedPlace.name,
+                    address: selectedPlace.address,
+                    google_maps_url: selectedPlace.url
+                }])
                 .select();
 
             if (restError) return alert(restError.message);
 
-            // Then, save the review linked to the restaurant
+            // Save review to Supabase
             const { error: reviewError } = await supabase
                 .from('reviews')
                 .insert([{ 
@@ -117,22 +179,24 @@
 
             if (reviewError) return alert(reviewError.message);
 
-            // Clear form and refresh
-            document.getElementById('restaurant-name').value = '';
+            // Reset form
+            searchInput.value = '';
             document.getElementById('dish-name').value = '';
+            selectedPlace = null; 
+            
             document.getElementById('submit-msg').classList.remove('hidden');
             setTimeout(() => document.getElementById('submit-msg').classList.add('hidden'), 3000);
             fetchReviews();
         });
 
-        // 4. Fetch and Display Reviews
+        // --- FETCH REVIEWS ---
         async function fetchReviews() {
             const { data, error } = await supabase
                 .from('reviews')
                 .select(`
                     dish_name,
                     rating,
-                    restaurants ( name )
+                    restaurants ( name, address, google_maps_url )
                 `)
                 .order('created_at', { ascending: false });
 
@@ -143,10 +207,17 @@
 
             data.forEach(review => {
                 const icon = review.rating === 'Like' ? '🔥' : review.rating === 'Dislike' ? '🚫' : '🤔';
+                
+                // Keep the clickable links!
                 reviewsList.innerHTML += `
                     <div class="bg-gray-100 p-3 rounded shadow-sm">
-                        <p class="font-bold">${review.restaurants.name} ${icon}</p>
-                        <p class="text-sm text-gray-700">Dish: ${review.dish_name}</p>
+                        <div class="flex justify-between items-start">
+                            <a href="${review.restaurants.google_maps_url}" target="_blank" class="font-bold text-blue-600 hover:underline">
+                                ${review.restaurants.name} ${icon}
+                            </a>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-1 truncate line-clamp-1">${review.restaurants.address}</p>
+                        <p class="text-sm text-gray-800">Dish: <span class="font-medium">${review.dish_name}</span></p>
                     </div>
                 `;
             });
