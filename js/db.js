@@ -1,22 +1,38 @@
 import { supabase } from './config.js'
 
 export async function fetchReviews() {
-    const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-            id,
-            dish_name,
-            rating,
-            notes,
-            cuisine_type,
-            created_at,
-            user_id,
-            restaurants ( name, address, google_maps_url ),
-            profiles ( display_name )
-        `)
-        .order('created_at', { ascending: false })
-    if (error) throw error
-    return data
+    const [reviewsRes, profilesRes] = await Promise.all([
+        supabase
+            .from('reviews')
+            .select(`
+                id,
+                dish_name,
+                rating,
+                notes,
+                cuisine_type,
+                created_at,
+                user_id,
+                restaurants ( name, address, google_maps_url )
+            `)
+            .order('created_at', { ascending: false }),
+        supabase
+            .from('profiles')
+            .select('id, display_name')
+    ])
+
+    if (reviewsRes.error) throw reviewsRes.error
+
+    // Build a quick lookup map for profiles
+    const profileMap = {}
+    if (profilesRes.data) {
+        profilesRes.data.forEach(p => { profileMap[p.id] = p })
+    }
+
+    // Attach profile to each review
+    return reviewsRes.data.map(r => ({
+        ...r,
+        profiles: profileMap[r.user_id] || null
+    }))
 }
 
 export async function insertRestaurant(place) {
@@ -56,9 +72,8 @@ export async function getProfile(userId) {
         .from('profiles')
         .select('display_name')
         .eq('id', userId)
-        .single()
-    // PGRST116 = row not found, not a real error
-    if (error && error.code !== 'PGRST116') throw error
+        .maybeSingle()
+    if (error) return null
     return data
 }
 
