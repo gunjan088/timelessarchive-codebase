@@ -1,0 +1,27 @@
+body {
+    font-family: -apple-system, system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f2f5;
+}
+.container {
+    text-align: center;
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+h1 { color: #1a1a1a; margin-bottom: 0.5rem; }
+p { color: #666; }
+.status-badge {
+    margin-top: 2rem;
+    display: inline-block;
+    padding: 5px 15px;
+    background: #0070f3;
+    color: white;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
