@@ -10,7 +10,7 @@
 </head>
 <body class="bg-gray-950 min-h-screen text-white">
 
-    <!-- AUTH SCREEN (visible by default — JS switches screens after init) -->
+    <!-- AUTH SCREEN — name only -->
     <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-sm">
             <div class="text-center mb-8">
@@ -18,27 +18,17 @@
                 <h1 class="text-3xl font-bold">BLR Bites</h1>
                 <p class="text-gray-400 mt-1 text-sm">Bangalore's personal food diary</p>
             </div>
-
-            <!-- Tab toggle -->
-            <div class="flex bg-gray-800 rounded-xl p-1 mb-4">
-                <button id="tab-login" class="auth-tab active flex-1 py-2 text-sm font-semibold rounded-lg transition-all">Sign In</button>
-                <button id="tab-signup" class="auth-tab flex-1 py-2 text-sm font-semibold rounded-lg transition-all">Sign Up</button>
-            </div>
-
             <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-3">
-                <!-- Sign up only -->
-                <input id="signup-name" type="text" placeholder="Your name (e.g. Gunjan)" class="hidden w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
-                <input id="email" type="email" placeholder="Email" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
-                <input id="password" type="password" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                <input id="entry-name" type="text" placeholder="Pick a username (e.g. gunjan)" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
                 <button id="auth-btn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold p-3 rounded-xl transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20 text-sm">
-                    Sign In
+                    Let's go →
                 </button>
                 <p id="auth-msg" class="text-red-400 text-sm text-center hidden"></p>
             </div>
         </div>
     </div>
 
-    <!-- PROFILE NAME PROMPT (first login, kept as fallback) -->
+    <!-- PROFILE NAME PROMPT (fallback for existing email users without a profile) -->
     <div id="profile-screen" class="hidden min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-sm">
             <div class="text-center mb-8">

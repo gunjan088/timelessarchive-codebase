@@ -84,6 +84,15 @@ export async function upsertProfile(userId, displayName) {
     if (error) throw error
 }
 
+export async function isUsernameTaken(name) {
+    const { data } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('display_name', name)
+        .maybeSingle()
+    return !!data
+}
+
 export async function getUniqueCuisines() {
     const { data, error } = await supabase
         .from('reviews')
