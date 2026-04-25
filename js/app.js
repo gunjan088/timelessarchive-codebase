@@ -133,6 +133,7 @@ async function loadFeed() {
     } catch (err) {
         showToast('Failed to load reviews', 'error')
         console.error(err)
+        renderCards([], reviewsGrid, emptyState)
     }
 }
 
@@ -320,4 +321,7 @@ function setupRealtime() {
 }
 
 // ── Start ──────────────────────────────────────────────────────────────────
-init()
+init().catch(err => {
+    console.error('Init failed:', err)
+    showScreen('auth')
+})
