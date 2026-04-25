@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel — Timeless Archive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="bg-gray-950 min-h-screen text-white">
+
+    <header id="main-nav" class="sticky top-0 z-40 bg-gray-950/90 backdrop-blur-md border-b border-gray-800/60"></header>
+
+    <main class="max-w-4xl mx-auto px-4 py-10">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold">✈️ Travel</h1>
+                <p class="text-gray-400 text-sm mt-1">Places I've been, things I've seen</p>
+            </div>
+            <button id="new-post-btn" class="hidden bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20">
+                + New Post
+            </button>
+        </div>
+
+        <div id="posts-grid" class="space-y-4"></div>
+
+        <div id="empty-state" class="hidden text-center py-20">
+            <div class="text-6xl mb-4">🗺️</div>
+            <p class="text-gray-400 text-lg font-medium">No travel posts yet</p>
+            <p class="text-gray-600 text-sm mt-1">Adventures incoming...</p>
+        </div>
+    </main>
+
+    <script type="module" src="./js/travel.js"></script>
+</body>
+</html>

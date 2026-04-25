@@ -113,3 +113,48 @@ export function subscribeToReviews(callback) {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews' }, callback)
         .subscribe()
 }
+
+// ── Travel ─────────────────────────────────────────────────────────────────
+
+export async function fetchTravelPosts() {
+    const { data, error } = await supabase
+        .from('travel_posts')
+        .select('id, title, destination, content, created_at, user_id')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+}
+
+export async function fetchTravelPost(id) {
+    const [postRes, placesRes] = await Promise.all([
+        supabase.from('travel_posts').select('*').eq('id', id).single(),
+        supabase.from('travel_places').select('*').eq('post_id', id).order('created_at')
+    ])
+    if (postRes.error) throw postRes.error
+    if (placesRes.error) throw placesRes.error
+    return { post: postRes.data, places: placesRes.data || [] }
+}
+
+export async function insertTravelPost({ userId, title, destination, content }) {
+    const { data, error } = await supabase
+        .from('travel_posts')
+        .insert([{ user_id: userId, title, destination, content }])
+        .select('id')
+    if (error) throw error
+    return data[0].id
+}
+
+export async function insertTravelPlace({ postId, name, type, notes }) {
+    const { data, error } = await supabase
+        .from('travel_places')
+        .insert([{ post_id: postId, name, type, notes: notes || null }])
+        .select('id')
+    if (error) throw error
+    return data[0].id
+}
+
+export async function deleteTravelPost(id) {
+    const { error } = await supabase.from('travel_posts').delete().eq('id', id)
+    if (error) throw error
+}

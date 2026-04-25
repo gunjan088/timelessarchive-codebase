@@ -7,6 +7,7 @@ import {
     renderSkeletons, renderCards, renderCuisinePills,
     renderCuisineFilter, showToast, openModal, closeModal
 } from './ui.js'
+import { renderNav, renderNavUser } from './nav.js'
 
 // ── State ──────────────────────────────────────────────────────────────────
 let currentUser   = null
@@ -46,19 +47,11 @@ async function init() {
         if (!profile) {
             showScreen('profile')
         } else {
-            setUserBadge(profile.display_name)
-            showScreen('app')
-            await loadFeed()
-            setupRealtime()
+            await enterApp(profile.display_name)
         }
     } else {
         showScreen('auth')
     }
-}
-
-function setUserBadge(name) {
-    document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase()
-    document.getElementById('user-name').textContent = name
 }
 
 // ── Auth tabs ──────────────────────────────────────────────────────────────
@@ -123,8 +116,10 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
         }
         currentUser = data.user
         await upsertProfile(currentUser.id, name)
-        setUserBadge(name)
         btn.textContent = 'Create Account'
+        btn.disabled = false
+        await enterApp(name)
+        return
     } else {
         btn.textContent = 'Signing in...'
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
@@ -138,14 +133,11 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
         currentUser = data.user
         const profile = await getProfile(currentUser.id)
         if (!profile) { showScreen('profile'); btn.disabled = false; return }
-        setUserBadge(profile.display_name)
         btn.textContent = 'Sign In'
+        btn.disabled = false
+        await enterApp(profile.display_name)
+        return
     }
-
-    btn.disabled = false
-    showScreen('app')
-    await loadFeed()
-    setupRealtime()
 })
 
 document.getElementById('password').addEventListener('keydown', e => {
@@ -157,10 +149,7 @@ document.getElementById('save-name-btn').addEventListener('click', async () => {
     const name = document.getElementById('display-name').value.trim()
     if (!name) return
     await upsertProfile(currentUser.id, name)
-    setUserBadge(name)
-    showScreen('app')
-    await loadFeed()
-    setupRealtime()
+    await enterApp(name)
 })
 
 document.getElementById('display-name').addEventListener('keydown', e => {
@@ -168,12 +157,33 @@ document.getElementById('display-name').addEventListener('keydown', e => {
 })
 
 // ── Logout ─────────────────────────────────────────────────────────────────
-document.getElementById('logout-btn').addEventListener('click', async () => {
-    await supabase.auth.signOut()
+async function logoutHandler() {
+    try { await supabase.auth.signOut() } catch (_) {}
     currentUser = null
     allReviews  = []
     showScreen('auth')
-})
+}
+
+function wireNavButtons() {
+    const btn = document.getElementById('add-review-btn')
+    if (!btn) return
+    // Clone and replace to remove any previous listeners
+    const fresh = btn.cloneNode(true)
+    btn.parentNode.replaceChild(fresh, btn)
+    fresh.addEventListener('click', () => {
+        resetModal()
+        openModal()
+    })
+}
+
+async function enterApp(displayName) {
+    showScreen('app')
+    renderNav('food', true)
+    renderNavUser(displayName, { onLogout: logoutHandler, showAddReview: true })
+    wireNavButtons()
+    await loadFeed()
+    setupRealtime()
+}
 
 // ── Feed ───────────────────────────────────────────────────────────────────
 async function loadFeed() {
@@ -248,11 +258,6 @@ document.getElementById('search-filter').addEventListener('input', e => {
 })
 
 // ── Modal ──────────────────────────────────────────────────────────────────
-document.getElementById('add-review-btn').addEventListener('click', () => {
-    resetModal()
-    openModal()
-})
-
 document.getElementById('modal-close').addEventListener('click', closeModal)
 
 document.getElementById('modal-overlay').addEventListener('click', e => {

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Post</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="bg-gray-950 min-h-screen text-white">
+
+    <header id="main-nav" class="sticky top-0 z-40 bg-gray-950/90 backdrop-blur-md border-b border-gray-800/60"></header>
+
+    <main class="max-w-2xl mx-auto px-4 py-10">
+        <a href="/travel.html" class="inline-flex items-center gap-1 text-gray-500 hover:text-gray-300 text-sm mb-8 transition-colors">
+            ← Back to Travel
+        </a>
+        <div id="post-content-area">
+            <div class="space-y-4">
+                <div class="skeleton h-8 w-3/4"></div>
+                <div class="skeleton h-4 w-1/3"></div>
+                <div class="skeleton h-32 w-full mt-6 rounded-xl"></div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="./js/travel-post.js"></script>
+</body>
+</html>
