@@ -25,14 +25,14 @@ export function renderSkeletons(container, n = 6) {
 }
 
 // ── Cards ──────────────────────────────────────────────────────────────────
-export function renderCards(reviews, container, emptyState) {
+export function renderCards(reviews, container, emptyState, currentUserId) {
     if (!reviews.length) {
         container.innerHTML = ''
         emptyState.classList.remove('hidden')
         return
     }
     emptyState.classList.add('hidden')
-    container.innerHTML = reviews.map((r, i) => buildCard(r, i)).join('')
+    container.innerHTML = reviews.map((r, i) => buildCard(r, i, currentUserId)).join('')
 }
 
 export function prependCard(review, container, emptyState) {
@@ -45,7 +45,7 @@ export function prependCard(review, container, emptyState) {
     container.prepend(card)
 }
 
-function buildCard(r, i) {
+function buildCard(r, i, currentUserId) {
     const { badge, badgeClass } = getRatingBadge(r.rating)
     const timeAgo = getTimeAgo(r.created_at)
     const name = r.profiles?.display_name || 'Someone'
@@ -62,7 +62,7 @@ function buildCard(r, i) {
     const shortAddr = r.restaurants.address.split(',').slice(1, 3).join(',').trim()
 
     return `
-        <div class="review-card bg-gray-900 hover:bg-gray-800/70 rounded-2xl border border-gray-800 hover:border-gray-700 p-4 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-0.5">
+        <div class="review-card group bg-gray-900 hover:bg-gray-800/70 rounded-2xl border border-gray-800 hover:border-gray-700 p-4 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-0.5">
             <div class="flex items-start justify-between gap-2 mb-2">
                 <a href="${escapeHtml(r.restaurants.google_maps_url)}" target="_blank" rel="noopener"
                     class="font-bold text-white hover:text-orange-400 transition-colors leading-tight line-clamp-2 flex-1 text-sm">
@@ -91,7 +91,10 @@ function buildCard(r, i) {
                     </div>
                     <span class="text-xs text-gray-400">${escapeHtml(name)}</span>
                 </div>
-                <span class="text-xs text-gray-600">${timeAgo}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-600">${timeAgo}</span>
+                    ${r.user_id === currentUserId ? `<button class="delete-btn opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all text-sm leading-none p-1 rounded hover:bg-red-400/10" data-id="${r.id}" title="Delete">✕</button>` : ''}
+                </div>
             </div>
         </div>
     `
