@@ -61,48 +61,94 @@ function setUserBadge(name) {
     document.getElementById('user-name').textContent = name
 }
 
-// ── Auth — username only (anonymous session) ───────────────────────────────
+// ── Auth tabs ──────────────────────────────────────────────────────────────
+let authMode = 'login'
+
+document.getElementById('tab-login').addEventListener('click', () => {
+    authMode = 'login'
+    document.getElementById('tab-login').classList.add('active')
+    document.getElementById('tab-signup').classList.remove('active')
+    document.getElementById('signup-name').classList.add('hidden')
+    document.getElementById('auth-btn').textContent = 'Sign In'
+    document.getElementById('auth-msg').classList.add('hidden')
+})
+
+document.getElementById('tab-signup').addEventListener('click', () => {
+    authMode = 'signup'
+    document.getElementById('tab-signup').classList.add('active')
+    document.getElementById('tab-login').classList.remove('active')
+    document.getElementById('signup-name').classList.remove('hidden')
+    document.getElementById('auth-btn').textContent = 'Create Account'
+    document.getElementById('auth-msg').classList.add('hidden')
+})
+
+// ── Show/hide password ─────────────────────────────────────────────────────
+document.getElementById('toggle-password').addEventListener('click', () => {
+    const input = document.getElementById('password')
+    const btn   = document.getElementById('toggle-password')
+    if (input.type === 'password') {
+        input.type = 'text'
+        btn.textContent = '🙈'
+    } else {
+        input.type = 'password'
+        btn.textContent = '👁'
+    }
+})
+
+// ── Auth submit ────────────────────────────────────────────────────────────
 document.getElementById('auth-btn').addEventListener('click', async () => {
-    const name = document.getElementById('entry-name').value.trim()
-    const btn  = document.getElementById('auth-btn')
-    const msg  = document.getElementById('auth-msg')
+    const email    = document.getElementById('email').value.trim()
+    const password = document.getElementById('password').value
+    const btn      = document.getElementById('auth-btn')
+    const msg      = document.getElementById('auth-msg')
 
-    if (!name) { msg.textContent = 'Enter a username to continue'; msg.classList.remove('hidden'); return }
-
-    btn.textContent = 'Checking...'
-    btn.disabled = true
     msg.classList.add('hidden')
+    if (!email)    { msg.textContent = 'Enter your email'; msg.classList.remove('hidden'); return }
+    if (!password) { msg.textContent = 'Enter your password'; msg.classList.remove('hidden'); return }
 
-    const taken = await isUsernameTaken(name)
-    if (taken) {
-        msg.textContent = `"${name}" is already taken — try another`
-        msg.classList.remove('hidden')
-        btn.textContent = "Let's go →"
-        btn.disabled = false
-        return
+    btn.disabled = true
+
+    if (authMode === 'signup') {
+        const name = document.getElementById('signup-name').value.trim()
+        if (!name) { msg.textContent = 'Enter your name'; msg.classList.remove('hidden'); btn.disabled = false; return }
+
+        btn.textContent = 'Creating account...'
+        const { data, error } = await supabase.auth.signUp({ email, password })
+        if (error) {
+            msg.textContent = error.message
+            msg.classList.remove('hidden')
+            btn.textContent = 'Create Account'
+            btn.disabled = false
+            return
+        }
+        currentUser = data.user
+        await upsertProfile(currentUser.id, name)
+        setUserBadge(name)
+        btn.textContent = 'Create Account'
+    } else {
+        btn.textContent = 'Signing in...'
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) {
+            msg.textContent = error.message
+            msg.classList.remove('hidden')
+            btn.textContent = 'Sign In'
+            btn.disabled = false
+            return
+        }
+        currentUser = data.user
+        const profile = await getProfile(currentUser.id)
+        if (!profile) { showScreen('profile'); btn.disabled = false; return }
+        setUserBadge(profile.display_name)
+        btn.textContent = 'Sign In'
     }
 
-    btn.textContent = 'Loading...'
-    const { data, error } = await supabase.auth.signInAnonymously()
-    if (error) {
-        msg.textContent = error.message
-        msg.classList.remove('hidden')
-        btn.textContent = "Let's go →"
-        btn.disabled = false
-        return
-    }
-
-    currentUser = data.user
-    await upsertProfile(currentUser.id, name)
-    setUserBadge(name)
-    btn.textContent = "Let's go →"
     btn.disabled = false
     showScreen('app')
     await loadFeed()
     setupRealtime()
 })
 
-document.getElementById('entry-name').addEventListener('keydown', e => {
+document.getElementById('password').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('auth-btn').click()
 })
 
