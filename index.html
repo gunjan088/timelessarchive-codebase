@@ -5,46 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLR Food Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        /* Make the search dropdown scrollbar look modern */
+        #search-results::-webkit-scrollbar { width: 6px; }
+        #search-results::-webkit-scrollbar-track { background: transparent; }
+        #search-results::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans p-6">
+<body class="bg-gradient-to-br from-orange-50 to-rose-100 min-h-screen text-gray-800 p-4 md:p-8">
 
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6 mt-10">
-        <h1 class="text-2xl font-bold mb-2">📍 BLR Food Tracker</h1>
+    <div class="max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-white/50 mt-4 md:mt-10">
         
-        <div id="auth-section" class="mb-6 pb-6 border-b">
-            <h2 class="text-lg font-semibold mb-2">Log In to Add Reviews</h2>
-            <input id="email" type="email" placeholder="Email" class="w-full mb-2 p-2 border rounded">
-            <input id="password" type="password" placeholder="Password" class="w-full mb-2 p-2 border rounded">
-            <div class="flex gap-2">
-                <button id="login-btn" class="bg-blue-600 text-white px-4 py-2 rounded font-semibold w-full">Log In</button>
-            </div>
-            <p id="auth-msg" class="text-sm text-red-500 mt-2 hidden"></p>
+        <div class="bg-gradient-to-r from-orange-500 to-red-500 p-6 text-white text-center shadow-inner">
+            <h1 class="text-3xl font-bold tracking-tight">📍 BLR Bites</h1>
+            <p class="text-orange-100 text-sm mt-1 opacity-90">Track your favorite Bangalore spots</p>
         </div>
-
-        <div id="app-section" class="hidden mb-6 pb-6 border-b">
-            <h2 class="text-lg font-semibold mb-2">Add a Spot</h2>
-            
-            <div class="relative w-full mb-2">
-                <input id="restaurant-search" type="text" placeholder="Search for a restaurant (e.g. Meghana)..." class="w-full p-2 border rounded border-blue-400 shadow-sm" autocomplete="off">
-                <ul id="search-results" class="absolute bg-white border w-full mt-1 rounded shadow-lg hidden z-10 max-h-48 overflow-y-auto"></ul>
+        
+        <div class="p-6 md:p-8">
+            <div id="auth-section" class="mb-6 pb-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Welcome Back</h2>
+                <div class="space-y-3">
+                    <input id="email" type="email" placeholder="Email address" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all">
+                    <input id="password" type="password" placeholder="Password" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all">
+                    <button id="login-btn" class="w-full bg-gray-900 hover:bg-gray-800 text-white p-3 rounded-xl font-semibold shadow-md transform transition hover:-translate-y-0.5">Log In</button>
+                </div>
+                <p id="auth-msg" class="text-sm text-red-500 mt-3 hidden text-center font-medium"></p>
             </div>
-            
-            <input id="dish-name" type="text" placeholder="What did you order?" class="w-full mb-2 p-2 border rounded">
-            
-            <select id="rating" class="w-full mb-4 p-2 border rounded">
-                <option value="Like">🔥 Loved it (Like)</option>
-                <option value="Dislike">🚫 Skip it (Dislike)</option>
-                <option value="One-Time Try">🤔 One-Time Try</option>
-            </select>
-            
-            <button id="submit-btn" class="bg-black text-white px-4 py-2 rounded font-bold w-full">Save Review</button>
-            <p id="submit-msg" class="text-sm text-green-600 mt-2 hidden">Review saved!</p>
-        </div>
 
-        <div>
-            <h2 class="text-lg font-semibold mb-4">Recent Reviews</h2>
-            <div id="reviews-list" class="space-y-4">
-                <p class="text-gray-500 text-sm">Loading reviews...</p>
+            <div id="app-section" class="hidden mb-8 pb-8 border-b border-gray-200">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Spot</h2>
+                
+                <div class="space-y-4">
+                    <div class="relative w-full">
+                        <input id="restaurant-search" type="text" placeholder="Search for a restaurant..." class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all shadow-sm" autocomplete="off">
+                        <ul id="search-results" class="absolute bg-white border border-gray-100 w-full mt-2 rounded-xl shadow-2xl hidden z-20 max-h-56 overflow-y-auto divide-y divide-gray-50"></ul>
+                    </div>
+                    
+                    <input id="dish-name" type="text" placeholder="What did you order?" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all">
+                    
+                    <select id="rating" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none appearance-none cursor-pointer">
+                        <option value="Like">🔥 Loved it</option>
+                        <option value="One-Time Try">🤔 One-Time Try</option>
+                        <option value="Dislike">🚫 Skip it</option>
+                    </select>
+                    
+                    <button id="submit-btn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-3 rounded-xl font-bold shadow-lg transform transition hover:-translate-y-0.5">Save Review</button>
+                    
+                    <div id="submit-msg" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-center text-sm font-medium mt-2">
+                        🎉 Review saved successfully!
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Recent Feed</h2>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">Live</span>
+                </div>
+                <div id="reviews-list" class="space-y-4">
+                    <div class="animate-pulse flex space-x-4">
+                        <div class="flex-1 space-y-4 py-1">
+                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div class="space-y-2">
+                                <div class="h-3 bg-gray-200 rounded"></div>
+                                <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -52,7 +82,6 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-        // 🛑 YOUR KEYS ARE NOW LIVE HERE 🛑
         const supabaseUrl = 'https://eyhcwmccjkvcpfbkbpea.supabase.co'
         const supabaseKey = 'sb_publishable_bBAzEQACxjmRwd7IqCLEvQ_eLzlOGAM'
         const supabase = createClient(supabaseUrl, supabaseKey)
@@ -74,16 +103,13 @@
             clearTimeout(timeout);
             const query = e.target.value;
             
-            // Wait until they type at least 3 letters
             if(query.length < 3) {
                 searchResults.classList.add('hidden');
                 return;
             }
             
-            // Wait 0.5 seconds after they stop typing before searching
             timeout = setTimeout(async () => {
                 try {
-                    // Appending "Bangalore" to force local results
                     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' Bangalore')}&limit=5`);
                     const data = await res.json();
                     
@@ -92,19 +118,19 @@
                         searchResults.classList.remove('hidden');
                         data.forEach(place => {
                             const li = document.createElement('li');
-                            li.className = 'p-2 border-b hover:bg-gray-100 cursor-pointer text-sm text-gray-700';
+                            li.className = 'p-3 hover:bg-orange-50 cursor-pointer transition-colors';
                             
-                            // Clean up the name for display
                             const shortName = place.name || place.display_name.split(',')[0];
-                            li.innerHTML = `<strong>${shortName}</strong><br><span class="text-xs text-gray-500">${place.display_name}</span>`;
+                            li.innerHTML = `
+                                <div class="font-semibold text-gray-800">${shortName}</div>
+                                <div class="text-xs text-gray-500 truncate mt-0.5">${place.display_name}</div>
+                            `;
                             
-                            // What happens when you click a result
                             li.onclick = () => {
                                 searchInput.value = shortName;
                                 selectedPlace = {
                                     name: shortName,
                                     address: place.display_name,
-                                    // Generate a Google Maps link using the GPS coordinates
                                     url: `http://maps.google.com/maps?q=${place.lat},${place.lon}`
                                 };
                                 searchResults.classList.add('hidden');
@@ -112,7 +138,7 @@
                             searchResults.appendChild(li);
                         });
                     } else {
-                        searchResults.innerHTML = '<li class="p-2 text-sm text-gray-500">No places found. Try another name.</li>';
+                        searchResults.innerHTML = '<li class="p-4 text-sm text-gray-500 text-center italic">No places found. Try another name.</li>';
                         searchResults.classList.remove('hidden');
                     }
                 } catch (err) {
@@ -121,7 +147,6 @@
             }, 500); 
         });
 
-        // Hide dropdown if you click somewhere else on the page
         document.addEventListener('click', (e) => {
             if (e.target !== searchInput && e.target !== searchResults) {
                 searchResults.classList.add('hidden');
@@ -142,7 +167,16 @@
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            
+            // Basic UI feedback during load
+            const btn = document.getElementById('login-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Loading...';
+            
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            
+            btn.textContent = originalText;
+            
             if (error) { authMsg.textContent = error.message; authMsg.classList.remove('hidden'); } 
             else { checkUser(); }
         });
@@ -155,7 +189,10 @@
             if(!selectedPlace) return alert("Please select a restaurant from the dropdown list!");
             if(!dishName) return alert("What did you order?");
 
-            // Save restaurant to Supabase
+            const btn = document.getElementById('submit-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Saving...';
+
             const { data: restData, error: restError } = await supabase
                 .from('restaurants')
                 .insert([{ 
@@ -165,9 +202,8 @@
                 }])
                 .select();
 
-            if (restError) return alert(restError.message);
+            if (restError) { btn.textContent = originalText; return alert(restError.message); }
 
-            // Save review to Supabase
             const { error: reviewError } = await supabase
                 .from('reviews')
                 .insert([{ 
@@ -177,9 +213,9 @@
                     rating: rating 
                 }]);
 
+            btn.textContent = originalText;
             if (reviewError) return alert(reviewError.message);
 
-            // Reset form
             searchInput.value = '';
             document.getElementById('dish-name').value = '';
             selectedPlace = null; 
@@ -203,21 +239,51 @@
             if (error) { console.error(error); return; }
 
             reviewsList.innerHTML = '';
-            if (data.length === 0) reviewsList.innerHTML = '<p class="text-gray-500 text-sm">No reviews yet.</p>';
+            if (data.length === 0) {
+                reviewsList.innerHTML = `
+                    <div class="text-center p-6 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <p class="text-gray-500 text-sm">No reviews yet. Be the first to add one!</p>
+                    </div>`;
+                return;
+            }
 
             data.forEach(review => {
-                const icon = review.rating === 'Like' ? '🔥' : review.rating === 'Dislike' ? '🚫' : '🤔';
-                
-                // Keep the clickable links!
+                // Map ratings to colorful Tailwind badges
+                let badgeClass = '';
+                let icon = '';
+                if(review.rating === 'Like') {
+                    badgeClass = 'bg-green-100 text-green-700 border-green-200';
+                    icon = '🔥 Loved it';
+                } else if(review.rating === 'Dislike') {
+                    badgeClass = 'bg-red-100 text-red-700 border-red-200';
+                    icon = '🚫 Skip it';
+                } else {
+                    badgeClass = 'bg-yellow-100 text-yellow-700 border-yellow-200';
+                    icon = '🤔 One-Time Try';
+                }
+
                 reviewsList.innerHTML += `
-                    <div class="bg-gray-100 p-3 rounded shadow-sm">
-                        <div class="flex justify-between items-start">
-                            <a href="${review.restaurants.google_maps_url}" target="_blank" class="font-bold text-blue-600 hover:underline">
-                                ${review.restaurants.name} ${icon}
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 to-red-400"></div>
+                        
+                        <div class="flex justify-between items-start mb-2 pl-2">
+                            <a href="${review.restaurants.google_maps_url}" target="_blank" class="font-bold text-gray-800 text-lg hover:text-orange-600 transition-colors">
+                                ${review.restaurants.name}
                             </a>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeClass} whitespace-nowrap ml-2">
+                                ${icon}
+                            </span>
                         </div>
-                        <p class="text-xs text-gray-500 mb-1 truncate line-clamp-1">${review.restaurants.address}</p>
-                        <p class="text-sm text-gray-800">Dish: <span class="font-medium">${review.dish_name}</span></p>
+                        
+                        <div class="pl-2">
+                            <p class="text-xs text-gray-400 mb-3 truncate line-clamp-1" title="${review.restaurants.address}">
+                                ${review.restaurants.address}
+                            </p>
+                            
+                            <div class="bg-gray-50 rounded-lg p-3 inline-block w-full border border-gray-100">
+                                <p class="text-sm text-gray-600">Order: <span class="font-medium text-gray-900">${review.dish_name}</span></p>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
