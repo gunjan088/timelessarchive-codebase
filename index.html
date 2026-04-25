@@ -225,11 +225,14 @@
             fetchReviews();
         });
 
-        // --- FETCH REVIEWS ---
+// --- FETCH REVIEWS ---
         async function fetchReviews() {
+            // We added 'id' and 'user_id' to the select statement!
             const { data, error } = await supabase
                 .from('reviews')
                 .select(`
+                    id,
+                    user_id,
                     dish_name,
                     rating,
                     restaurants ( name, address, google_maps_url )
@@ -248,7 +251,6 @@
             }
 
             data.forEach(review => {
-                // Map ratings to colorful Tailwind badges
                 let badgeClass = '';
                 let icon = '';
                 if(review.rating === 'Like') {
@@ -262,6 +264,13 @@
                     icon = '🤔 One-Time Try';
                 }
 
+                // Check if the current logged-in user owns this review
+                const isOwner = currentUser && currentUser.id === review.user_id;
+                // If they own it, show a delete button. If not, show nothing.
+                const deleteBtnHtml = isOwner 
+                    ? `<button onclick="deleteReview('${review.id}')" class="text-xs text-red-400 hover:text-red-600 transition-colors">🗑️ Delete</button>` 
+                    : '';
+
                 reviewsList.innerHTML += `
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden group">
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 to-red-400"></div>
@@ -270,9 +279,12 @@
                             <a href="${review.restaurants.google_maps_url}" target="_blank" class="font-bold text-gray-800 text-lg hover:text-orange-600 transition-colors">
                                 ${review.restaurants.name}
                             </a>
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeClass} whitespace-nowrap ml-2">
-                                ${icon}
-                            </span>
+                            <div class="flex flex-col items-end gap-2">
+                                <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeClass} whitespace-nowrap ml-2">
+                                    ${icon}
+                                </span>
+                                ${deleteBtnHtml}
+                            </div>
                         </div>
                         
                         <div class="pl-2">
@@ -289,6 +301,22 @@
             });
         }
 
+        // --- NEW: DELETE REVIEW FUNCTION ---
+        // We attach it to the window object so the HTML button can trigger it
+        window.deleteReview = async function(reviewId) {
+            if(!confirm("Are you sure you want to delete this review?")) return;
+            
+            const { error } = await supabase
+                .from('reviews')
+                .delete()
+                .eq('id', reviewId);
+                
+            if (error) {
+                alert("Error deleting: " + error.message);
+            } else {
+                fetchReviews(); // Refresh the feed instantly
+            }
+        };
         checkUser();
     </script>
 </body>
