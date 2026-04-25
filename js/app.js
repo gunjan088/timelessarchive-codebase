@@ -1,7 +1,7 @@
 import { supabase } from './config.js'
 import {
     fetchReviews, insertRestaurant, insertReview,
-    getProfile, upsertProfile, getUniqueCuisines, subscribeToReviews
+    getProfile, upsertProfile, getUniqueCuisines, subscribeToReviews, deleteReview
 } from './db.js'
 import {
     renderSkeletons, renderCards, renderCuisinePills,
@@ -152,8 +152,27 @@ function renderFiltered() {
             r.dish_name.toLowerCase().includes(q)
         )
     }
-    renderCards(filtered, reviewsGrid, emptyState)
+    renderCards(filtered, reviewsGrid, emptyState, currentUser?.id)
 }
+
+// ── Delete ─────────────────────────────────────────────────────────────────
+reviewsGrid.addEventListener('click', async e => {
+    const btn = e.target.closest('.delete-btn')
+    if (!btn) return
+    const id = btn.dataset.id
+    btn.textContent = '...'
+    btn.disabled = true
+    try {
+        await deleteReview(id)
+        allReviews = allReviews.filter(r => r.id !== id)
+        renderFiltered()
+        showToast('Review deleted')
+    } catch (err) {
+        showToast('Failed to delete', 'error')
+        btn.textContent = '✕'
+        btn.disabled = false
+    }
+})
 
 // ── Filter chips ───────────────────────────────────────────────────────────
 document.querySelectorAll('.filter-chip').forEach(btn => {
