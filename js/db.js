@@ -241,6 +241,49 @@ export async function deleteBookReview(id) {
     if (error) throw error
 }
 
+// ── Itineraries ─────────────────────────────────────────────────────────────
+
+export async function fetchItineraries() {
+    const { data, error } = await supabase
+        .from('itineraries')
+        .select('id, title, destination, start_date, end_date, status, created_at, user_id')
+        .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+}
+
+export async function fetchItinerary(id) {
+    const [itinRes, placesRes, budgetsRes] = await Promise.all([
+        supabase.from('itineraries').select('*').eq('id', id).maybeSingle(),
+        supabase.from('itinerary_places').select('*').eq('itinerary_id', id).order('display_order'),
+        supabase.from('itinerary_budgets').select('*').eq('itinerary_id', id)
+    ])
+    if (itinRes.error) throw itinRes.error
+    if (!itinRes.data) throw new Error('Itinerary not found')
+    return { itinerary: itinRes.data, places: placesRes.data || [], budgets: budgetsRes.data || [] }
+}
+
+export async function insertItinerary({ userId, title, destination, startDate, endDate, status }) {
+    const { data, error } = await supabase
+        .from('itineraries')
+        .insert([{ user_id: userId, title, destination, start_date: startDate || null, end_date: endDate || null, status }])
+        .select('id')
+    if (error) throw error
+    return data[0].id
+}
+
+export async function upsertItineraryBudget({ itineraryId, category, budget }) {
+    const { error } = await supabase
+        .from('itinerary_budgets')
+        .upsert([{ itinerary_id: itineraryId, category, budget }], { onConflict: 'itinerary_id,category' })
+    if (error) throw error
+}
+
+export async function deleteItinerary(id) {
+    const { error } = await supabase.from('itineraries').delete().eq('id', id)
+    if (error) throw error
+}
+
 export async function insertItineraryPlace({ itineraryId, name, category, notes, costEstimate, lat, lng, displayOrder, city, dayNumber }) {
     const { data, error } = await supabase
         .from('itinerary_places')
