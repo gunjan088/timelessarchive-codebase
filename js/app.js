@@ -40,6 +40,14 @@ function showScreen(name) {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init() {
+    // Always show the app and load the feed — auth is only needed to add reviews
+    showScreen('app')
+    renderNav('food', false)
+    wireNavButtons()
+    await loadFeed()
+    setupRealtime()
+
+    // Silently check if user is already logged in
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
         currentUser = user
@@ -47,10 +55,10 @@ async function init() {
         if (!profile) {
             showScreen('profile')
         } else {
-            await enterApp(profile.display_name)
+            renderNav('food', true)
+            renderNavUser(profile.display_name, { onLogout: logoutHandler, showAddReview: true })
+            wireNavButtons()
         }
-    } else {
-        showScreen('auth')
     }
 }
 
@@ -160,17 +168,18 @@ document.getElementById('display-name').addEventListener('keydown', e => {
 async function logoutHandler() {
     try { await supabase.auth.signOut() } catch (_) {}
     currentUser = null
-    allReviews  = []
-    showScreen('auth')
+    renderNav('food', false)
+    // Re-render cards to remove delete buttons
+    renderFiltered()
 }
 
 function wireNavButtons() {
     const btn = document.getElementById('add-review-btn')
     if (!btn) return
-    // Clone and replace to remove any previous listeners
     const fresh = btn.cloneNode(true)
     btn.parentNode.replaceChild(fresh, btn)
     fresh.addEventListener('click', () => {
+        if (!currentUser) { showScreen('auth'); return }
         resetModal()
         openModal()
     })
@@ -181,8 +190,14 @@ async function enterApp(displayName) {
     renderNav('food', true)
     renderNavUser(displayName, { onLogout: logoutHandler, showAddReview: true })
     wireNavButtons()
-    await loadFeed()
-    setupRealtime()
+    // Only reload feed if needed (first load already happened in init)
+    if (!allReviews.length) {
+        await loadFeed()
+        setupRealtime()
+    } else {
+        // Re-render to show delete buttons on own reviews
+        renderFiltered()
+    }
 }
 
 // ── Feed ───────────────────────────────────────────────────────────────────
@@ -400,5 +415,5 @@ function setupRealtime() {
 // ── Start ──────────────────────────────────────────────────────────────────
 init().catch(err => {
     console.error('Init failed:', err)
-    showScreen('auth')
+    showScreen('app')
 })
