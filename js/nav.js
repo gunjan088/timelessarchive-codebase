@@ -5,15 +5,16 @@ export function renderNav(activePage, isLoggedIn = false) {
     if (!nav) return
     nav.innerHTML = `
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-6">
-                <a href="/index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                    <span class="font-bold text-lg tracking-tight">Somewhere Good</span>
+            <div class="flex items-center gap-2 sm:gap-6">
+                <a href="/index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+                    <span class="font-bold text-lg tracking-tight hidden sm:block">Somewhere Good</span>
+                    <span class="font-bold text-lg tracking-tight sm:hidden">SG</span>
                 </a>
-                <nav class="flex items-center gap-1">
-                    <a href="/index.html" class="nav-link ${activePage === 'food' ? 'nav-link-active' : ''}">🍽️ Food</a>
-                    <a href="/travel/" class="nav-link ${activePage === 'travel' ? 'nav-link-active' : ''}">✈️ Travel</a>
-                    <a href="/movies/" class="nav-link ${activePage === 'movies' ? 'nav-link-active' : ''}">🎬 Movies</a>
-                    <a href="/books/" class="nav-link ${activePage === 'books' ? 'nav-link-active' : ''}">📚 Books</a>
+                <nav class="flex items-center gap-0.5 sm:gap-1">
+                    <a href="/index.html" class="nav-link ${activePage === 'food' ? 'nav-link-active' : ''}">🍽️<span class="hidden sm:inline"> Food</span></a>
+                    <a href="/travel/" class="nav-link ${activePage === 'travel' ? 'nav-link-active' : ''}">✈️<span class="hidden sm:inline"> Travel</span></a>
+                    <a href="/movies/" class="nav-link ${activePage === 'movies' ? 'nav-link-active' : ''}">🎬<span class="hidden sm:inline"> Movies</span></a>
+                    <a href="/books/" class="nav-link ${activePage === 'books' ? 'nav-link-active' : ''}">📚<span class="hidden sm:inline"> Books</span></a>
                 </nav>
             </div>
             <div id="nav-user-area" class="flex items-center gap-2 sm:gap-3">
