@@ -1,5 +1,5 @@
 import { supabase } from './config.js'
-import { insertItinerary, insertItineraryPlace, upsertItineraryBudget } from './db.js'
+import { insertItinerary, insertItineraryPlace, upsertItineraryBudget, fetchItinerary, updateItinerary, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
 import { escapeHtml } from './utils.js'
@@ -7,6 +7,7 @@ import { escapeHtml } from './utils.js'
 let currentUser = null
 let selectedStatus = 'planning'
 let activeCategory = 'stay'
+let editItineraryId = null
 
 // places[category] = [{name, notes, costEstimate, lat, lng, city, dayNumber}]
 const places = { stay: [], eat: [], visit: [], leisure: [] }
@@ -173,34 +174,58 @@ document.getElementById('publish-btn').addEventListener('click', async () => {
     btn.disabled = true
 
     try {
-        const itineraryId = await insertItinerary({
-            userId: currentUser.id, title, destination, startDate, endDate, status: selectedStatus
-        })
-
-        // Save budgets
-        for (const [category, budget] of Object.entries(budgets)) {
-            if (budget != null) await upsertItineraryBudget({ itineraryId, category, budget })
-        }
-
-        // Save places with display_order
-        for (const category of ['stay', 'eat', 'visit', 'leisure']) {
-            for (let i = 0; i < places[category].length; i++) {
-                const p = places[category][i]
-                await insertItineraryPlace({
-                    itineraryId, name: p.name, category,
-                    notes: p.notes, costEstimate: p.costEstimate,
-                    lat: p.lat, lng: p.lng, displayOrder: i,
-                    city: p.city, dayNumber: p.dayNumber
-                })
+        if (editItineraryId) {
+            await updateItinerary(editItineraryId, { title, destination, startDate, endDate, status: selectedStatus })
+            // Re-save budgets
+            for (const [category, budget] of Object.entries(budgets)) {
+                if (budget != null) await upsertItineraryBudget({ itineraryId: editItineraryId, category, budget })
             }
-        }
+            // Delete and re-insert places
+            const { error: delErr } = await supabase.from('itinerary_places').delete().eq('itinerary_id', editItineraryId)
+            if (delErr) throw delErr
+            for (const category of ['stay', 'eat', 'visit', 'leisure']) {
+                for (let i = 0; i < places[category].length; i++) {
+                    const p = places[category][i]
+                    await insertItineraryPlace({
+                        itineraryId: editItineraryId, name: p.name, category,
+                        notes: p.notes, costEstimate: p.costEstimate,
+                        lat: p.lat, lng: p.lng, displayOrder: i,
+                        city: p.city, dayNumber: p.dayNumber
+                    })
+                }
+            }
+            showToast('Itinerary updated! 🗺️')
+            window.location.href = `/travel/itinerary.html?id=${editItineraryId}`
+        } else {
+            const itineraryId = await insertItinerary({
+                userId: currentUser.id, title, destination, startDate, endDate, status: selectedStatus
+            })
 
-        showToast('Itinerary saved! 🗺️')
-        window.location.href = `/travel/itinerary.html?id=${itineraryId}`
+            // Save budgets
+            for (const [category, budget] of Object.entries(budgets)) {
+                if (budget != null) await upsertItineraryBudget({ itineraryId, category, budget })
+            }
+
+            // Save places with display_order
+            for (const category of ['stay', 'eat', 'visit', 'leisure']) {
+                for (let i = 0; i < places[category].length; i++) {
+                    const p = places[category][i]
+                    await insertItineraryPlace({
+                        itineraryId, name: p.name, category,
+                        notes: p.notes, costEstimate: p.costEstimate,
+                        lat: p.lat, lng: p.lng, displayOrder: i,
+                        city: p.city, dayNumber: p.dayNumber
+                    })
+                }
+            }
+
+            showToast('Itinerary saved! 🗺️')
+            window.location.href = `/travel/itinerary.html?id=${itineraryId}`
+        }
     } catch (err) {
         msg.textContent = err.message || 'Failed to save'
         msg.classList.remove('hidden')
-        btn.textContent = 'Save Itinerary'
+        btn.textContent = editItineraryId ? 'Update Itinerary' : 'Save Itinerary'
         btn.disabled = false
     }
 })
@@ -212,11 +237,44 @@ async function init() {
     currentUser = user
 
     renderNav('travel', true)
-    const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+    const profile = await getProfile(user.id)
     if (profile) {
         renderNavUser(profile.display_name, {
             onLogout: async () => { await supabase.auth.signOut(); window.location.href = '/index.html' }
         })
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    editItineraryId = params.get('id')
+    if (editItineraryId) {
+        document.querySelector('h1') && (document.querySelector('h1').textContent = '🗺️ Edit Itinerary')
+        document.getElementById('publish-btn').textContent = 'Update Itinerary'
+        try {
+            const { itinerary, places: existingPlaces, budgets: existingBudgets } = await fetchItinerary(editItineraryId)
+            document.getElementById('itin-title').value = itinerary.title
+            document.getElementById('itin-destination').value = itinerary.destination
+            if (itinerary.start_date) document.getElementById('itin-start').value = itinerary.start_date
+            if (itinerary.end_date) document.getElementById('itin-end').value = itinerary.end_date
+            setStatus(itinerary.status)
+            // Pre-fill places
+            existingPlaces.forEach(p => {
+                places[p.category]?.push({
+                    name: p.name,
+                    notes: p.notes || '',
+                    costEstimate: p.cost_estimate || null,
+                    lat: p.lat || null,
+                    lng: p.lng || null,
+                    city: p.city || null,
+                    dayNumber: p.day_number || null
+                })
+            })
+            // Pre-fill budgets
+            existingBudgets.forEach(b => { budgets[b.category] = b.budget })
+            renderPlaces()
+            updateBudgetSummary()
+        } catch (err) {
+            showToast('Failed to load itinerary', 'error')
+        }
     }
 
     document.querySelectorAll('.cat-tab').forEach(btn => {

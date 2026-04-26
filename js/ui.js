@@ -1,4 +1,4 @@
-import { escapeHtml, getTimeAgo } from './utils.js'
+import { escapeHtml, getTimeAgo, getRatingBadge } from './utils.js'
 
 const CUISINES = [
     'South Indian', 'North Indian', 'Cafe', 'Brewery',
@@ -48,7 +48,7 @@ export function prependCard(review, container, emptyState) {
 }
 
 function buildCard(r, i, currentUserId) {
-    const { badge, badgeClass } = getRatingBadge(r.rating)
+    const { badge, cls: badgeClass } = getRatingBadge(r.rating)
     const timeAgo = getTimeAgo(r.created_at)
     const name = r.profiles?.display_name || 'Someone'
     const initial = name.charAt(0).toUpperCase()
@@ -61,17 +61,17 @@ function buildCard(r, i, currentUserId) {
         ? `<span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">${escapeHtml(r.cuisine_type)}</span>`
         : ''
 
-    const shortAddr = r.restaurants.address.split(',').slice(1, 3).join(',').trim()
+    const shortAddr = r.restaurants?.address?.split(',').slice(1, 3).join(',').trim() ?? ''
 
     return `
         <div class="review-card group bg-gray-900 hover:bg-gray-800/70 rounded-2xl border border-gray-800 hover:border-gray-700 p-4 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-0.5">
             <div class="flex items-start justify-between gap-2 mb-2">
-                ${r.restaurants.google_maps_url
+                ${r.restaurants?.google_maps_url
                     ? `<a href="${escapeHtml(r.restaurants.google_maps_url)}" target="_blank" rel="noopener"
                           class="font-bold text-white hover:text-orange-400 transition-colors leading-tight line-clamp-2 flex-1 text-sm">
-                          ${escapeHtml(r.restaurants.name)}
+                          ${escapeHtml(r.restaurants?.name)}
                        </a>`
-                    : `<span class="font-bold text-white leading-tight line-clamp-2 flex-1 text-sm">${escapeHtml(r.restaurants.name)}</span>`
+                    : `<span class="font-bold text-white leading-tight line-clamp-2 flex-1 text-sm">${escapeHtml(r.restaurants?.name)}</span>`
                 }
                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeClass} whitespace-nowrap flex-shrink-0">
                     ${badge}
@@ -103,12 +103,6 @@ function buildCard(r, i, currentUserId) {
             </div>
         </div>
     `
-}
-
-function getRatingBadge(rating) {
-    if (rating === 'Like')    return { badge: '🔥 Loved', badgeClass: 'bg-green-900/40 text-green-400 border-green-800/60' }
-    if (rating === 'Dislike') return { badge: '🚫 Skip',  badgeClass: 'bg-red-900/40 text-red-400 border-red-800/60' }
-    return                           { badge: '🤔 Once',  badgeClass: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/60' }
 }
 
 // ── Cuisine pills (modal) ──────────────────────────────────────────────────

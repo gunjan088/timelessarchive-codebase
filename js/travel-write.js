@@ -1,11 +1,12 @@
 import { supabase } from './config.js'
-import { insertTravelPost, insertTravelPlace } from './db.js'
+import { insertTravelPost, insertTravelPlace, fetchTravelPost, updateTravelPost, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
 import { escapeHtml, typeStyle } from './utils.js'
 
 let currentUser = null
 let places = []
+let editPostId = null
 
 function renderPlaces() {
     const list = document.getElementById('places-list')
@@ -65,21 +66,33 @@ document.getElementById('publish-btn').addEventListener('click', async () => {
     if (!destination) { msg.textContent = 'Add a destination'; msg.classList.remove('hidden'); return }
     if (!content)     { msg.textContent = 'Write something!'; msg.classList.remove('hidden'); return }
 
-    btn.textContent = 'Publishing...'
+    btn.textContent = editPostId ? 'Updating...' : 'Publishing...'
     btn.disabled = true
 
     try {
-        const postId = await insertTravelPost({ userId: currentUser.id, title, destination, content })
-        if (!postId) throw new Error('Failed to get post ID')
-        for (const place of places) {
-            await insertTravelPlace({ postId, ...place })
+        if (editPostId) {
+            await updateTravelPost(editPostId, { title, destination, content })
+            // Delete existing places and re-insert
+            const { error: delErr } = await supabase.from('travel_places').delete().eq('post_id', editPostId)
+            if (delErr) throw delErr
+            for (const place of places) {
+                await insertTravelPlace({ postId: editPostId, ...place })
+            }
+            showToast('Post updated! ✏️')
+            window.location.href = `/travel/post.html?id=${editPostId}`
+        } else {
+            const postId = await insertTravelPost({ userId: currentUser.id, title, destination, content })
+            if (!postId) throw new Error('Failed to get post ID')
+            for (const place of places) {
+                await insertTravelPlace({ postId, ...place })
+            }
+            showToast('Post published! ✈️')
+            window.location.href = `/travel/post.html?id=${postId}`
         }
-        showToast('Post published! ✈️')
-        window.location.href = `/travel/post.html?id=${postId}`
     } catch (err) {
         msg.textContent = err.message || 'Failed to publish'
         msg.classList.remove('hidden')
-        btn.textContent = 'Publish Post'
+        btn.textContent = editPostId ? 'Update Post' : 'Publish Post'
         btn.disabled = false
     }
 })
@@ -90,11 +103,31 @@ async function init() {
     currentUser = user
 
     renderNav('travel', true)
-    const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+    const profile = await getProfile(user.id)
     if (profile) {
         renderNavUser(profile.display_name, {
             onLogout: async () => { await supabase.auth.signOut(); window.location.href = '/index.html' }
         })
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    editPostId = params.get('id')
+    if (editPostId) {
+        document.querySelector('h1') && (document.querySelector('h1').textContent = '✏️ Edit Post')
+        document.getElementById('publish-btn').textContent = 'Update Post'
+        try {
+            const { post, places: existingPlaces } = await fetchTravelPost(editPostId)
+            document.getElementById('post-title').value = post.title
+            document.getElementById('post-destination').value = post.destination
+            document.getElementById('post-content').value = post.content
+            // Pre-fill places
+            existingPlaces.forEach(p => {
+                places.push({ name: p.name, type: p.type, notes: p.notes || '' })
+            })
+            renderPlaces()
+        } catch (err) {
+            showToast('Failed to load post', 'error')
+        }
     }
 }
 

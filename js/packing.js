@@ -1,6 +1,6 @@
 import { supabase } from './config.js'
 import { fetchPackingLists, fetchPackingItems, insertPackingList, deletePackingList,
-         insertPackingItem, togglePackingItem, deletePackingItem, fetchItineraries } from './db.js'
+         insertPackingItem, togglePackingItem, deletePackingItem, fetchItineraries, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
 import { escapeHtml } from './utils.js'
@@ -124,14 +124,7 @@ function wireListEvents() {
                 await togglePackingItem(itemId, cb.checked)
                 const item = itemCache[listId]?.find(i => i.id === itemId)
                 if (item) item.is_checked = cb.checked
-                // Re-render just this list's items + progress
-                const itemsEl = document.getElementById(`items-${listId}`)
-                if (itemsEl) itemsEl.outerHTML = renderItemsHtml(listId, itemCache[listId])
-                // Update progress in header
-                const card = document.getElementById(`list-card-${listId}`)
-                const progressEl = card?.querySelector('.flex.items-center.gap-2')
-                if (progressEl) progressEl.innerHTML = progress(itemCache[listId])
-                wireListEvents()
+                renderLists()
             } catch (err) { showToast('Failed to update', 'error') }
         })
     })
@@ -220,7 +213,7 @@ async function init() {
     renderNav('travel', !!user)
 
     if (user) {
-        const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+        const profile = await getProfile(user.id)
         if (profile) {
             renderNavUser(profile.display_name, {
                 onLogout: async () => { await supabase.auth.signOut(); window.location.href = '/index.html' }

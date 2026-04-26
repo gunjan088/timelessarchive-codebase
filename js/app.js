@@ -179,8 +179,6 @@ async function logoutHandler() {
     document.getElementById('wishlist-chip')?.classList.add('hidden')
     if (activeFilter === 'wishlist') {
         activeFilter = 'all'
-        document.querySelector('[data-filter="all"]')?.classList.add('active')
-        document.getElementById('wishlist-chip')?.classList.remove('active')
     }
     // Re-render cards to remove delete buttons
     renderFiltered()
@@ -288,7 +286,9 @@ async function loadFeed() {
 
 function renderFiltered() {
     if (activeFilter === 'wishlist') {
-        renderWishlistCards(wishlistItems, reviewsGrid, emptyState, handleMarkVisited)
+        renderWishlistCards(wishlistItems, reviewsGrid, emptyState, handleMarkVisited, (id) => {
+            wishlistItems = wishlistItems.filter(i => i.id !== id)
+        })
         return
     }
     let filtered = allReviews

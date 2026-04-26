@@ -1,5 +1,5 @@
 import { supabase } from './config.js'
-import { fetchTravelPosts, deleteTravelPost, fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
+import { fetchTravelPosts, deleteTravelPost, fetchWishlist, insertWishlistItem, deleteWishlistItem, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
 import { renderWishlistCards, openWishlistModal } from './wishlist.js'
@@ -32,7 +32,7 @@ function renderPosts(posts) {
                 </div>
             </div>
             ${currentUser?.id === p.user_id ? `
-            <div class="flex gap-3 mt-4 pt-4 border-t border-gray-800" onclick="event.stopPropagation(); event.preventDefault()">
+            <div class="flex gap-3 mt-4 pt-4 border-t border-gray-800">
                 <a href="/travel/write.html?id=${escapeHtml(p.id)}" class="text-xs text-gray-500 hover:text-orange-400 transition-colors">Edit</a>
                 <button class="delete-post-btn text-xs text-gray-500 hover:text-red-400 transition-colors" data-id="${escapeHtml(p.id)}">Delete</button>
             </div>` : ''}
@@ -58,17 +58,23 @@ async function loadTravelWishlist() {
     try {
         wishlistItems = await fetchWishlist('travel')
         wishlistLoaded = true
-        renderWishlistCards(wishlistItems, postsGrid, document.getElementById('empty-state'), handleMarkVisited)
+        renderWishlistCards(wishlistItems, postsGrid, document.getElementById('empty-state'), handleMarkVisited, (id) => {
+            wishlistItems = wishlistItems.filter(i => i.id !== id)
+        })
     } catch (err) {
         showToast('Failed to load wishlist', 'error')
     }
 }
 
-function handleMarkVisited(wishlistId) {
-    deleteWishlistItem(wishlistId).catch(() => showToast('Failed to remove', 'error'))
-    wishlistItems = wishlistItems.filter(i => i.id !== wishlistId)
-    wishlistLoaded = false
-    showToast('Removed from wishlist')
+async function handleMarkVisited(wishlistId) {
+    try {
+        await deleteWishlistItem(wishlistId)
+        wishlistItems = wishlistItems.filter(i => i.id !== wishlistId)
+        wishlistLoaded = false
+        showToast('Removed from wishlist')
+    } catch (err) {
+        showToast('Failed to remove', 'error')
+    }
 }
 
 async function init() {
@@ -77,7 +83,7 @@ async function init() {
     renderNav('travel', !!user)
 
     if (user) {
-        const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+        const profile = await getProfile(user.id)
         if (profile) {
             renderNavUser(profile.display_name, {
                 onLogout: async () => { await supabase.auth.signOut(); window.location.href = '/index.html' }
@@ -113,7 +119,9 @@ async function init() {
             activeFilter = btn.dataset.filter
             if (activeFilter === 'wishlist') {
                 if (!wishlistLoaded) loadTravelWishlist()
-                else renderWishlistCards(wishlistItems, document.getElementById('posts-grid'), document.getElementById('empty-state'), handleMarkVisited)
+                else renderWishlistCards(wishlistItems, document.getElementById('posts-grid'), document.getElementById('empty-state'), handleMarkVisited, (id) => {
+                    wishlistItems = wishlistItems.filter(i => i.id !== id)
+                })
             } else {
                 loadPosts()
             }
@@ -126,6 +134,7 @@ async function init() {
         const btn = e.target.closest('.delete-post-btn')
         if (!btn) return
         e.preventDefault()
+        e.stopPropagation()
         if (!confirm('Delete this post?')) return
         try {
             await deleteTravelPost(btn.dataset.id)

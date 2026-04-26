@@ -1,5 +1,5 @@
 import { supabase } from './config.js'
-import { fetchItineraries, deleteItinerary } from './db.js'
+import { fetchItineraries, deleteItinerary, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
 import { escapeHtml, formatDate } from './utils.js'
@@ -31,7 +31,7 @@ function renderItineraries(items) {
                 </div>
             </div>
             ${currentUser?.id === it.user_id ? `
-            <div class="flex gap-3 mt-4 pt-4 border-t border-gray-800" onclick="event.stopPropagation(); event.preventDefault()">
+            <div class="flex gap-3 mt-4 pt-4 border-t border-gray-800">
                 <a href="/travel/itinerary-write.html?id=${escapeHtml(it.id)}" class="text-xs text-gray-500 hover:text-orange-400 transition-colors">Edit</a>
                 <button class="delete-itinerary-btn text-xs text-gray-500 hover:text-red-400 transition-colors" data-id="${escapeHtml(it.id)}">Delete</button>
             </div>` : ''}
@@ -57,7 +57,7 @@ async function init() {
     renderNav('travel', !!user)
 
     if (user) {
-        const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+        const profile = await getProfile(user.id)
         if (profile) {
             renderNavUser(profile.display_name, {
                 onLogout: async () => { await supabase.auth.signOut(); window.location.href = '/index.html' }
@@ -76,6 +76,7 @@ async function init() {
         const btn = e.target.closest('.delete-itinerary-btn')
         if (!btn) return
         e.preventDefault()
+        e.stopPropagation()
         if (!confirm('Delete this itinerary?')) return
         try {
             await deleteItinerary(btn.dataset.id)

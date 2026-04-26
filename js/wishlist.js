@@ -2,7 +2,7 @@ import { deleteWishlistItem } from './db.js'
 import { showToast } from './ui.js'
 import { escapeHtml, getTimeAgo } from './utils.js'
 
-export function renderWishlistCards(items, container, emptyState, onMarkVisited) {
+export function renderWishlistCards(items, container, emptyState, onMarkVisited, onDelete) {
     if (!items.length) {
         container.innerHTML = ''
         emptyState.classList.remove('hidden')
@@ -44,10 +44,12 @@ export function renderWishlistCards(items, container, emptyState, onMarkVisited)
 
     container.querySelectorAll('.delete-wishlist-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
+            const id = btn.dataset.id
             try {
-                await deleteWishlistItem(btn.dataset.id)
+                await deleteWishlistItem(id)
                 showToast('Removed from wishlist')
                 btn.closest('.wishlist-card').remove()
+                if (onDelete) onDelete(id)
             } catch (err) { showToast('Failed to remove', 'error') }
         })
     })

@@ -154,6 +154,14 @@ export async function insertTravelPlace({ postId, name, type, notes }) {
     return data[0].id
 }
 
+export async function updateTravelPost(id, { title, destination, content }) {
+    const { error } = await supabase
+        .from('travel_posts')
+        .update({ title, destination, content })
+        .eq('id', id)
+    if (error) throw error
+}
+
 export async function deleteTravelPost(id) {
     const { error } = await supabase.from('travel_posts').delete().eq('id', id)
     if (error) throw error
@@ -292,6 +300,14 @@ export async function upsertItineraryBudget({ itineraryId, category, budget }) {
     const { error } = await supabase
         .from('itinerary_budgets')
         .upsert([{ itinerary_id: itineraryId, category, budget }], { onConflict: 'itinerary_id,category' })
+    if (error) throw error
+}
+
+export async function updateItinerary(id, { title, destination, startDate, endDate, status }) {
+    const { error } = await supabase
+        .from('itineraries')
+        .update({ title, destination, start_date: startDate || null, end_date: endDate || null, status })
+        .eq('id', id)
     if (error) throw error
 }
 

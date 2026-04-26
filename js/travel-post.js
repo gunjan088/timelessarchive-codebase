@@ -1,5 +1,5 @@
 import { supabase } from './config.js'
-import { fetchTravelPost } from './db.js'
+import { fetchTravelPost, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { escapeHtml, formatDate, typeStyle } from './utils.js'
 
@@ -43,7 +43,7 @@ async function init() {
     renderNav('travel', !!user)
 
     if (user) {
-        const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+        const profile = await getProfile(user.id)
         if (profile) {
             renderNavUser(profile.display_name, {
                 onLogout: async () => { await supabase.auth.signOut(); window.location.href = '/index.html' }

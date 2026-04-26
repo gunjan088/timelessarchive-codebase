@@ -18,7 +18,7 @@ export function getTimeAgo(dateString) {
     if (hrs < 24)  return `${hrs}h ago`
     const days = Math.floor(hrs / 24)
     if (days < 30) return `${days}d ago`
-    return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+    return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export function formatDate(dateStr) {
@@ -30,4 +30,11 @@ export function typeStyle(type) {
     if (type === 'Stay') return 'bg-blue-900/40 text-blue-400 border-blue-800/60'
     if (type === 'Do')   return 'bg-green-900/40 text-green-400 border-green-800/60'
     return 'bg-purple-900/40 text-purple-400 border-purple-800/60'
+}
+
+export function getRatingBadge(rating) {
+    if (rating === 'Like')         return { badge: '🔥 Loved',  cls: 'bg-green-900/40 text-green-400 border-green-800/60' }
+    if (rating === 'Dislike')      return { badge: '🚫 Skip',   cls: 'bg-red-900/40 text-red-400 border-red-800/60' }
+    if (rating === 'One-Time Try') return { badge: '🤔 Once',   cls: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/60' }
+    return                                { badge: '🤔 Once',   cls: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/60' }
 }

@@ -1,8 +1,8 @@
 import { supabase } from './config.js'
-import { fetchBookReviews, insertBookReview, deleteBookReview } from './db.js'
+import { fetchBookReviews, insertBookReview, deleteBookReview, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { renderSkeletons, showToast, openModal, closeModal } from './ui.js'
-import { escapeHtml, getTimeAgo } from './utils.js'
+import { escapeHtml, getTimeAgo, getRatingBadge } from './utils.js'
 
 const GENRES = ['Fiction', 'Non-fiction', 'Sci-Fi', 'Fantasy', 'Biography', 'History', 'Self-help', 'Other']
 
@@ -13,19 +13,11 @@ let activeGenreFilter = ''
 let searchQuery    = ''
 let selectedRating = null
 let selectedGenre  = null
-let activeModalTab = 'review'
 
 const reviewsGrid = document.getElementById('reviews-grid')
 const emptyState  = document.getElementById('empty-state')
 
 // ── Badge helpers ─────────────────────────────────────────────────────────────
-function getRatingBadge(rating) {
-    if (rating === 'Like')         return { badge: '🔥 Loved',  cls: 'bg-green-900/40 text-green-400 border-green-800/60' }
-    if (rating === 'Dislike')      return { badge: '🚫 Skip',   cls: 'bg-red-900/40 text-red-400 border-red-800/60' }
-    if (rating === 'One-Time Try') return { badge: '🤔 Once',   cls: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/60' }
-    return null
-}
-
 function getStatusBadge(status) {
     if (status === 'read')     return { badge: '📖 Read',         cls: 'bg-blue-900/40 text-blue-400 border-blue-800/60' }
     if (status === 'wishlist') return { badge: '🔖 Want to read', cls: 'bg-purple-900/40 text-purple-400 border-purple-800/60' }
@@ -164,7 +156,6 @@ document.getElementById('search-filter').addEventListener('input', e => { search
 // ── Modal tab switching ───────────────────────────────────────────────────────
 function switchModalTab(tab) {
     if (!tab) return
-    activeModalTab = tab
     document.querySelectorAll('.modal-tab').forEach(btn => {
         const isActive = btn.dataset.tab === tab
         btn.classList.toggle('text-orange-400', isActive)
@@ -295,7 +286,7 @@ async function init() {
 
     if (user) {
         renderNav('books', true)
-        const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+        const profile = await getProfile(user.id)
         if (profile) {
             renderNavUser(profile.display_name, { onLogout: async () => { await supabase.auth.signOut(); location.reload() } })
         }

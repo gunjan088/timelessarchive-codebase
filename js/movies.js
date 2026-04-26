@@ -1,9 +1,9 @@
 import { supabase } from './config.js'
-import { fetchScreenReviews, insertScreenReview, deleteScreenReview, fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
+import { fetchScreenReviews, insertScreenReview, deleteScreenReview, fetchWishlist, insertWishlistItem, deleteWishlistItem, getProfile } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { renderSkeletons, showToast, openModal, closeModal } from './ui.js'
 import { renderWishlistCards } from './wishlist.js'
-import { escapeHtml, getTimeAgo } from './utils.js'
+import { escapeHtml, getTimeAgo, getRatingBadge } from './utils.js'
 
 const GENRES = ['Action', 'Comedy', 'Drama', 'Thriller', 'Horror', 'Sci-Fi', 'Romance', 'Animation', 'Crime', 'Fantasy', 'Other']
 
@@ -20,12 +20,6 @@ let selectedGenre = null
 
 const reviewsGrid = document.getElementById('reviews-grid')
 const emptyState  = document.getElementById('empty-state')
-
-function getRatingBadge(rating) {
-    if (rating === 'Like')        return { badge: '🔥 Loved',   cls: 'bg-green-900/40 text-green-400 border-green-800/60' }
-    if (rating === 'Dislike')     return { badge: '🚫 Skip',    cls: 'bg-red-900/40 text-red-400 border-red-800/60' }
-    return                               { badge: '🤔 Once',    cls: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/60' }
-}
 
 function renderCards(reviews) {
     if (!reviews.length) { reviewsGrid.innerHTML = ''; emptyState.classList.remove('hidden'); return }
@@ -62,7 +56,9 @@ function renderCards(reviews) {
 
 function renderFiltered() {
     if (activeFilter === 'wishlist') {
-        renderWishlistCards(wishlistItems, reviewsGrid, emptyState, handleMarkVisited)
+        renderWishlistCards(wishlistItems, reviewsGrid, emptyState, handleMarkVisited, (id) => {
+            wishlistItems = wishlistItems.filter(i => i.id !== id)
+        })
         return
     }
     let filtered = allReviews
@@ -277,21 +273,27 @@ function wireButtons() {
 }
 
 async function init() {
-    renderNav('movies', false)
-    await loadFeed()
-
+    // 1. Resolve auth first
     const { data: { user } } = await supabase.auth.getUser()
     currentUser = user
+
+    // 2. Render nav once with correct logged-in state
     if (user) {
         renderNav('movies', true)
-        const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+        const profile = await getProfile(user.id)
         if (profile) {
             renderNavUser(profile.display_name, { onLogout: async () => { await supabase.auth.signOut(); location.reload() } })
         }
         document.getElementById('movies-wishlist-chip')?.classList.remove('hidden')
-        renderFiltered()
+    } else {
+        renderNav('movies', false)
     }
+
+    // 3. Wire buttons (currentUser is now set)
     wireButtons()
+
+    // 4. Load data
+    await loadFeed()
 }
 
 init().catch(err => {
