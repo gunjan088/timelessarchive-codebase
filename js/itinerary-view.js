@@ -50,7 +50,7 @@ function renderHeader(itinerary) {
                     ${statusBadge}
                 </div>
                 <h1 class="text-3xl font-bold">${escapeHtml(itinerary.title)}</h1>
-                ${itinerary.start_date ? `<p class="text-gray-500 text-sm mt-1">${itinerary.start_date}${itinerary.end_date ? ' → ' + itinerary.end_date : ''}</p>` : ''}
+                ${itinerary.start_date ? `<p class="text-gray-500 text-sm mt-1">${escapeHtml(itinerary.start_date)}${itinerary.end_date ? ' → ' + escapeHtml(itinerary.end_date) : ''}</p>` : ''}
             </div>
             ${currentUser?.id === itinerary.user_id ? `
             <a href="/travel/itinerary-write.html?id=${escapeHtml(itinerary.id)}" class="text-sm text-gray-500 hover:text-orange-400 transition-colors flex-shrink-0">Edit</a>` : ''}
