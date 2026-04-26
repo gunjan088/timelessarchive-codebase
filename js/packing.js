@@ -181,6 +181,7 @@ document.getElementById('cancel-list-btn').addEventListener('click', () => {
 })
 
 document.getElementById('save-list-btn').addEventListener('click', async () => {
+    if (!currentUser) return
     const name = document.getElementById('new-list-name').value.trim()
     if (!name) { document.getElementById('new-list-name').focus(); return }
     const itineraryId = document.getElementById('new-list-itinerary').value || null

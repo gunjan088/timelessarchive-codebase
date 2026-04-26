@@ -58,12 +58,14 @@ async function loadTravelWishlist() {
     try {
         wishlistItems = await fetchWishlist('travel')
         wishlistLoaded = true
-        renderWishlistCards(wishlistItems, postsGrid, document.getElementById('empty-state'), handleMarkVisited, (id) => {
-            wishlistItems = wishlistItems.filter(i => i.id !== id)
-        })
+        renderWishlistCards(wishlistItems, postsGrid, document.getElementById('empty-state'), handleMarkVisited, handleWishlistDelete)
     } catch (err) {
         showToast('Failed to load wishlist', 'error')
     }
+}
+
+function handleWishlistDelete(id) {
+    wishlistItems = wishlistItems.filter(i => i.id !== id)
 }
 
 async function handleMarkVisited(wishlistId) {
@@ -71,6 +73,7 @@ async function handleMarkVisited(wishlistId) {
         await deleteWishlistItem(wishlistId)
         wishlistItems = wishlistItems.filter(i => i.id !== wishlistId)
         wishlistLoaded = false
+        renderWishlistCards(wishlistItems, document.getElementById('posts-grid'), document.getElementById('empty-state'), handleMarkVisited, handleWishlistDelete)
         showToast('Removed from wishlist')
     } catch (err) {
         showToast('Failed to remove', 'error')
@@ -119,9 +122,7 @@ async function init() {
             activeFilter = btn.dataset.filter
             if (activeFilter === 'wishlist') {
                 if (!wishlistLoaded) loadTravelWishlist()
-                else renderWishlistCards(wishlistItems, document.getElementById('posts-grid'), document.getElementById('empty-state'), handleMarkVisited, (id) => {
-                    wishlistItems = wishlistItems.filter(i => i.id !== id)
-                })
+                else renderWishlistCards(wishlistItems, document.getElementById('posts-grid'), document.getElementById('empty-state'), handleMarkVisited, handleWishlistDelete)
             } else {
                 loadPosts()
             }

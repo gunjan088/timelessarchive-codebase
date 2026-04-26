@@ -228,7 +228,9 @@ function wireButtons() {
     // + Add button
     const addBtn = document.getElementById('add-btn')
     if (addBtn) {
-        addBtn.addEventListener('click', () => {
+        const fresh = addBtn.cloneNode(true)
+        addBtn.parentNode.replaceChild(fresh, addBtn)
+        fresh.addEventListener('click', () => {
             if (!currentUser) { showToast('Sign in to add', 'error'); return }
             switchModalTab('review')
             selectedGenre = null
@@ -245,12 +247,14 @@ function wireButtons() {
     // Watchlist submit
     const wlSubmit = document.getElementById('wl-submit-btn')
     if (wlSubmit) {
-        wlSubmit.addEventListener('click', async () => {
+        const freshWl = wlSubmit.cloneNode(true)
+        wlSubmit.parentNode.replaceChild(freshWl, wlSubmit)
+        freshWl.addEventListener('click', async () => {
             const name = document.getElementById('wl-name').value.trim()
             if (!name) { showToast('Enter a title', 'error'); return }
             if (!currentUser) { showToast('Sign in to add', 'error'); return }
-            wlSubmit.textContent = 'Saving...'
-            wlSubmit.disabled = true
+            freshWl.textContent = 'Saving...'
+            freshWl.disabled = true
             try {
                 await insertWishlistItem({
                     userId: currentUser.id, category: 'movies', name,
@@ -272,8 +276,8 @@ function wireButtons() {
             } catch (err) {
                 showToast('Failed to save', 'error')
             } finally {
-                wlSubmit.textContent = 'Save to Watchlist'
-                wlSubmit.disabled = false
+                freshWl.textContent = 'Save to Watchlist'
+                freshWl.disabled = false
             }
         })
     }
