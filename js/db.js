@@ -240,3 +240,23 @@ export async function deleteBookReview(id) {
     const { error } = await supabase.from('book_reviews').delete().eq('id', id)
     if (error) throw error
 }
+
+export async function insertItineraryPlace({ itineraryId, name, category, notes, costEstimate, lat, lng, displayOrder, city, dayNumber }) {
+    const { data, error } = await supabase
+        .from('itinerary_places')
+        .insert([{
+            itinerary_id: itineraryId,
+            name,
+            category,
+            notes: notes ?? null,
+            cost_estimate: costEstimate ?? null,
+            lat: lat ?? null,
+            lng: lng ?? null,
+            display_order: displayOrder ?? 0,
+            city: city ?? null,
+            day_number: dayNumber ?? null
+        }])
+        .select('id')
+    if (error) throw error
+    return data[0].id
+}
