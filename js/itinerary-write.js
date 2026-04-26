@@ -8,7 +8,7 @@ let currentUser = null
 let selectedStatus = 'planning'
 let activeCategory = 'stay'
 
-// places[category] = [{name, notes, costEstimate, lat, lng}]
+// places[category] = [{name, notes, costEstimate, lat, lng, city, dayNumber}]
 const places = { stay: [], eat: [], visit: [], leisure: [] }
 // budgets[category] = number | null
 const budgets = { stay: null, eat: null, visit: null, leisure: null }
@@ -55,7 +55,9 @@ function renderPlaces() {
     list.innerHTML = catPlaces.map((p, i) => `
         <div class="flex items-center gap-2 bg-gray-900/60 rounded-xl p-3 border border-gray-800">
             <span class="flex-1 text-sm font-medium">${escapeHtml(p.name)}</span>
-            ${p.notes ? `<span class="text-xs text-gray-500 truncate max-w-[120px]">${escapeHtml(p.notes)}</span>` : ''}
+            ${p.city ? `<span class="text-xs text-gray-500">· ${escapeHtml(p.city)}</span>` : ''}
+            ${p.dayNumber ? `<span class="text-xs text-gray-500">Day ${escapeHtml(String(p.dayNumber))}</span>` : ''}
+            ${p.notes ? `<span class="text-xs text-gray-500 truncate max-w-[100px]">${escapeHtml(p.notes)}</span>` : ''}
             ${p.costEstimate ? `<span class="text-xs text-orange-400">₹${p.costEstimate.toLocaleString()}</span>` : ''}
             ${p.lat ? '<span class="text-xs text-green-600" title="Geocoded">📍</span>' : ''}
             <button class="remove-place text-gray-600 hover:text-red-400 transition-colors text-xs px-1" data-i="${i}">✕</button>
@@ -72,11 +74,13 @@ function renderPlaces() {
 
 function addPlaceRow() {
     const div = document.createElement('div')
-    div.className = 'flex gap-2 items-start bg-gray-900 rounded-xl p-3 border border-gray-700'
+    div.className = 'flex flex-wrap gap-2 items-start bg-gray-900 rounded-xl p-3 border border-gray-700'
     div.innerHTML = `
-        <input class="place-name flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" placeholder="Place name">
-        <input class="place-cost w-24 bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" type="number" placeholder="₹ cost">
-        <input class="place-notes flex-1 bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" placeholder="Notes (optional)">
+        <input class="place-name flex-1 min-w-[140px] bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" placeholder="Place name">
+        <input class="place-city w-28 bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" placeholder="City">
+        <input class="place-day w-16 bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" type="number" min="1" placeholder="Day">
+        <input class="place-cost w-20 bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" type="number" placeholder="₹">
+        <input class="place-notes flex-1 min-w-[120px] bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500" placeholder="Notes">
         <button class="confirm-place text-orange-400 hover:text-orange-300 text-lg px-2 font-bold leading-none">✓</button>
         <button class="cancel-place text-gray-600 hover:text-red-400 text-sm px-1 leading-none">✕</button>
     `
@@ -84,14 +88,16 @@ function addPlaceRow() {
         const name = div.querySelector('.place-name').value.trim()
         if (!name) { div.querySelector('.place-name').focus(); return }
         const costVal = div.querySelector('.place-cost').value
+        const dayVal = div.querySelector('.place-day').value
         const costEstimate = costVal ? parseFloat(costVal) : null
+        const dayNumber = dayVal ? parseInt(dayVal, 10) : null
+        const city = div.querySelector('.place-city').value.trim() || null
         const notes = div.querySelector('.place-notes').value.trim()
 
-        // Geocode in background
         div.querySelector('.confirm-place').textContent = '...'
         const { lat, lng } = await geocode(name)
 
-        places[activeCategory].push({ name, notes, costEstimate, lat, lng })
+        places[activeCategory].push({ name, notes, costEstimate, lat, lng, city, dayNumber })
         div.remove()
         renderPlaces()
         updateBudgetSummary()
@@ -183,7 +189,8 @@ document.getElementById('publish-btn').addEventListener('click', async () => {
                 await insertItineraryPlace({
                     itineraryId, name: p.name, category,
                     notes: p.notes, costEstimate: p.costEstimate,
-                    lat: p.lat, lng: p.lng, displayOrder: i
+                    lat: p.lat, lng: p.lng, displayOrder: i,
+                    city: p.city, dayNumber: p.dayNumber
                 })
             }
         }
