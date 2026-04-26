@@ -123,6 +123,45 @@
                         <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Title</label>
                         <input id="wl-name" type="text" placeholder="e.g. Oppenheimer, Succession..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
                     </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Type <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
+                            <select id="wl-type" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-orange-500 transition-colors text-sm appearance-none" style="font-family:'Poppins',sans-serif">
+                                <option value="">—</option>
+                                <option>Movie</option>
+                                <option>Series</option>
+                                <option>Documentary</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Genre <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
+                            <select id="wl-genre" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-orange-500 transition-colors text-sm appearance-none" style="font-family:'Poppins',sans-serif">
+                                <option value="">—</option>
+                                <option>Action</option>
+                                <option>Comedy</option>
+                                <option>Drama</option>
+                                <option>Thriller</option>
+                                <option>Horror</option>
+                                <option>Sci-Fi</option>
+                                <option>Romance</option>
+                                <option>Animation</option>
+                                <option>Crime</option>
+                                <option>Fantasy</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">IMDb <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
+                            <input id="wl-imdb" type="text" placeholder="e.g. 8.5" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Rotten Tomatoes <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
+                            <input id="wl-rt" type="text" placeholder="e.g. 92%" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                        </div>
+                    </div>
                     <div>
                         <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Notes <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
                         <input id="wl-notes" type="text" placeholder="e.g. Recommended by..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">

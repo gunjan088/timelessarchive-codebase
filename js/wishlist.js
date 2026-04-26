@@ -15,6 +15,16 @@ export function renderWishlistCards(items, container, emptyState, onMarkVisited)
                 <span class="font-bold text-white text-sm flex-1">${escapeHtml(item.name)}</span>
                 <span class="text-xs bg-orange-900/30 text-orange-400 border border-orange-800/40 px-2 py-0.5 rounded-full flex-shrink-0">🔖 Wishlist</span>
             </div>
+            ${(item.item_type || item.item_genre) ? `
+                <div class="flex items-center gap-1.5 flex-wrap mb-2">
+                    ${item.item_type ? `<span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">${escapeHtml(item.item_type)}</span>` : ''}
+                    ${item.item_genre ? `<span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">${escapeHtml(item.item_genre)}</span>` : ''}
+                </div>` : ''}
+            ${(item.imdb_rating || item.rt_rating) ? `
+                <div class="flex items-center gap-3 mb-2">
+                    ${item.imdb_rating ? `<span class="text-xs text-yellow-400">⭐ IMDb ${escapeHtml(item.imdb_rating)}</span>` : ''}
+                    ${item.rt_rating ? `<span class="text-xs text-red-400">🍅 ${escapeHtml(item.rt_rating)}</span>` : ''}
+                </div>` : ''}
             ${item.notes ? `<p class="text-xs text-gray-400 italic mb-3">"${escapeHtml(item.notes)}"</p>` : ''}
             <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-800/80">
                 <button class="mark-visited-btn text-xs text-orange-400 hover:text-orange-300 transition-colors font-medium" data-id="${escapeHtml(item.id)}" data-name="${escapeHtml(item.name)}">

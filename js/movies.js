@@ -249,12 +249,23 @@ function wireButtons() {
             wlSubmit.textContent = 'Saving...'
             wlSubmit.disabled = true
             try {
-                await insertWishlistItem({ userId: currentUser.id, category: 'movies', name, notes: document.getElementById('wl-notes').value.trim() })
+                await insertWishlistItem({
+                    userId: currentUser.id, category: 'movies', name,
+                    notes: document.getElementById('wl-notes').value.trim(),
+                    itemType: document.getElementById('wl-type').value || null,
+                    itemGenre: document.getElementById('wl-genre').value || null,
+                    imdbRating: document.getElementById('wl-imdb').value.trim() || null,
+                    rtRating: document.getElementById('wl-rt').value.trim() || null
+                })
                 showToast('Added to watchlist 🔖')
                 wishlistLoaded = false
                 closeModal()
                 document.getElementById('wl-name').value = ''
                 document.getElementById('wl-notes').value = ''
+                document.getElementById('wl-type').value = ''
+                document.getElementById('wl-genre').value = ''
+                document.getElementById('wl-imdb').value = ''
+                document.getElementById('wl-rt').value = ''
             } catch (err) {
                 showToast('Failed to save', 'error')
             } finally {

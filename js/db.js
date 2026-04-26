@@ -164,17 +164,24 @@ export async function deleteTravelPost(id) {
 export async function fetchWishlist(category) {
     const { data, error } = await supabase
         .from('wishlists')
-        .select('id, name, notes, created_at')
+        .select('id, name, notes, item_type, item_genre, imdb_rating, rt_rating, created_at')
         .eq('category', category)
         .order('created_at', { ascending: false })
     if (error) throw error
     return data
 }
 
-export async function insertWishlistItem({ userId, category, name, notes }) {
+export async function insertWishlistItem({ userId, category, name, notes, itemType, itemGenre, imdbRating, rtRating }) {
     const { data, error } = await supabase
         .from('wishlists')
-        .insert([{ user_id: userId, category, name, notes: notes || null }])
+        .insert([{
+            user_id: userId, category, name,
+            notes: notes || null,
+            item_type: itemType || null,
+            item_genre: itemGenre || null,
+            imdb_rating: imdbRating || null,
+            rt_rating: rtRating || null
+        }])
         .select('id')
     if (error) throw error
     return data[0].id
