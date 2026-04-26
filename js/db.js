@@ -231,6 +231,8 @@ export async function fetchItinerary(id) {
         supabase.from('itinerary_budgets').select('*').eq('itinerary_id', id)
     ])
     if (itin.error) throw itin.error
+    if (places.error) throw places.error
+    if (budgets.error) throw budgets.error
     return {
         itinerary: itin.data,
         places: places.data || [],
@@ -255,10 +257,10 @@ export async function insertItineraryPlace({ itineraryId, name, category, notes,
             name,
             category,
             notes: notes || null,
-            cost_estimate: costEstimate || null,
-            lat: lat || null,
-            lng: lng || null,
-            display_order: displayOrder || 0
+            cost_estimate: costEstimate ?? null,
+            lat: lat ?? null,
+            lng: lng ?? null,
+            display_order: displayOrder ?? 0
         }])
         .select('id')
     if (error) throw error
