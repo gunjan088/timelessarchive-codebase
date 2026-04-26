@@ -56,7 +56,14 @@ function renderCards(reviews) {
 
 function renderFiltered() {
     if (activeFilter === 'wishlist') {
-        renderWishlistCards(wishlistItems, reviewsGrid, emptyState, handleMarkVisited, (id) => {
+        let filtered = wishlistItems
+        if (activeTypeFilter) filtered = filtered.filter(i => i.item_type === activeTypeFilter)
+        if (activeGenreFilter) filtered = filtered.filter(i => i.item_genre === activeGenreFilter)
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase()
+            filtered = filtered.filter(i => (i.name || '').toLowerCase().includes(q))
+        }
+        renderWishlistCards(filtered, reviewsGrid, emptyState, handleMarkVisited, (id) => {
             wishlistItems = wishlistItems.filter(i => i.id !== id)
         })
         return
