@@ -346,6 +346,9 @@ function resetModal() {
     searchResults.classList.add('hidden')
     document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'))
     renderCuisinePills(document.getElementById('cuisine-pills'))
+    document.getElementById('manual-entry-row').classList.add('hidden')
+    document.getElementById('manual-restaurant-name').value = ''
+    document.getElementById('manual-confirm-msg').classList.add('hidden')
 }
 
 // ── Cuisine pills (inside modal) ───────────────────────────────────────────
@@ -415,6 +418,39 @@ searchInput.addEventListener('input', e => {
 document.addEventListener('click', e => {
     if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
         searchResults.classList.add('hidden')
+    }
+})
+
+// ── Manual restaurant entry ────────────────────────────────────────────────
+document.getElementById('add-manually-btn').addEventListener('click', () => {
+    const row = document.getElementById('manual-entry-row')
+    const isHidden = row.classList.contains('hidden')
+    row.classList.toggle('hidden')
+    if (isHidden) {
+        // Pre-fill with whatever is already typed in the search box
+        const nameInput = document.getElementById('manual-restaurant-name')
+        nameInput.value = searchInput.value
+        nameInput.focus()
+        searchResults.classList.add('hidden')
+        if (nameInput.value) {
+            selectedPlace = { name: nameInput.value, address: 'Added manually', url: null }
+            document.getElementById('manual-confirm-msg').classList.remove('hidden')
+        }
+    } else {
+        // Toggled off — clear manual selection if it was set manually
+        if (selectedPlace?.address === 'Added manually') selectedPlace = null
+        document.getElementById('manual-confirm-msg').classList.add('hidden')
+    }
+})
+
+document.getElementById('manual-restaurant-name').addEventListener('input', e => {
+    const name = e.target.value.trim()
+    if (name) {
+        selectedPlace = { name, address: 'Added manually', url: null }
+        document.getElementById('manual-confirm-msg').classList.remove('hidden')
+    } else {
+        selectedPlace = null
+        document.getElementById('manual-confirm-msg').classList.add('hidden')
     }
 })
 

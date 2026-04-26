@@ -66,10 +66,13 @@ function buildCard(r, i, currentUserId) {
     return `
         <div class="review-card group bg-gray-900 hover:bg-gray-800/70 rounded-2xl border border-gray-800 hover:border-gray-700 p-4 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-0.5">
             <div class="flex items-start justify-between gap-2 mb-2">
-                <a href="${escapeHtml(r.restaurants.google_maps_url)}" target="_blank" rel="noopener"
-                    class="font-bold text-white hover:text-orange-400 transition-colors leading-tight line-clamp-2 flex-1 text-sm">
-                    ${escapeHtml(r.restaurants.name)}
-                </a>
+                ${r.restaurants.google_maps_url
+                    ? `<a href="${escapeHtml(r.restaurants.google_maps_url)}" target="_blank" rel="noopener"
+                          class="font-bold text-white hover:text-orange-400 transition-colors leading-tight line-clamp-2 flex-1 text-sm">
+                          ${escapeHtml(r.restaurants.name)}
+                       </a>`
+                    : `<span class="font-bold text-white leading-tight line-clamp-2 flex-1 text-sm">${escapeHtml(r.restaurants.name)}</span>`
+                }
                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeClass} whitespace-nowrap flex-shrink-0">
                     ${badge}
                 </span>

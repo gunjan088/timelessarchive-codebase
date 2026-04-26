@@ -13,6 +13,7 @@ export function renderNav(activePage, isLoggedIn = false) {
                     <a href="/index.html" class="nav-link ${activePage === 'food' ? 'nav-link-active' : ''}">🍽️ Food</a>
                     <a href="/travel/" class="nav-link ${activePage === 'travel' ? 'nav-link-active' : ''}">✈️ Travel</a>
                     <a href="/movies/" class="nav-link ${activePage === 'movies' ? 'nav-link-active' : ''}">🎬 Movies</a>
+                    <a href="/books/" class="nav-link ${activePage === 'books' ? 'nav-link-active' : ''}">📚 Books</a>
                 </nav>
             </div>
             <div id="nav-user-area" class="flex items-center gap-2 sm:gap-3">

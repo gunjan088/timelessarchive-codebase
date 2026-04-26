@@ -108,6 +108,16 @@
                         class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
                     <ul id="search-results" class="absolute bg-gray-800 border border-gray-700 w-full mt-1 rounded-xl shadow-2xl hidden z-20 max-h-48 overflow-y-auto divide-y divide-gray-700/50"></ul>
                 </div>
+                <div>
+                    <button id="add-manually-btn" type="button" class="text-xs text-gray-500 hover:text-orange-400 transition-colors">
+                        Can't find it? Add manually →
+                    </button>
+                    <div id="manual-entry-row" class="hidden mt-2 space-y-1">
+                        <input id="manual-restaurant-name" type="text" placeholder="Restaurant name"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                        <p id="manual-confirm-msg" class="text-xs text-orange-400 hidden">✓ Saved — fill in the rest below</p>
+                    </div>
+                </div>
 
                 <!-- Dish -->
                 <div>

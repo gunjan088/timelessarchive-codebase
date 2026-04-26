@@ -213,76 +213,30 @@ export async function deleteScreenReview(id) {
     if (error) throw error
 }
 
-// ── Itineraries ─────────────────────────────────────────────────────────────
+// ── Book reviews ────────────────────────────────────────────────────────────
 
-export async function fetchItineraries() {
-    const { data, error } = await supabase
-        .from('itineraries')
-        .select('id, title, destination, start_date, end_date, status, created_at, user_id')
-        .order('created_at', { ascending: false })
-    if (error) throw error
-    return data
-}
-
-export async function fetchItinerary(id) {
-    const [itin, places, budgets] = await Promise.all([
-        supabase.from('itineraries').select('*').eq('id', id).single(),
-        supabase.from('itinerary_places').select('*').eq('itinerary_id', id).order('display_order'),
-        supabase.from('itinerary_budgets').select('*').eq('itinerary_id', id)
+export async function fetchBookReviews() {
+    const [reviewsRes, profilesRes] = await Promise.all([
+        supabase
+            .from('book_reviews')
+            .select('id, title, author, genre, note, rating, created_at, user_id')
+            .order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id, display_name')
     ])
-    if (itin.error) throw itin.error
-    if (places.error) throw places.error
-    if (budgets.error) throw budgets.error
-    return {
-        itinerary: itin.data,
-        places: places.data || [],
-        budgets: budgets.data || []
-    }
+    if (reviewsRes.error) throw reviewsRes.error
+    const profileMap = {}
+    if (profilesRes.data) profilesRes.data.forEach(p => { profileMap[p.id] = p })
+    return reviewsRes.data.map(r => ({ ...r, profiles: profileMap[r.user_id] || null }))
 }
 
-export async function insertItinerary({ userId, title, destination, startDate, endDate, status }) {
-    const { data, error } = await supabase
-        .from('itineraries')
-        .insert([{ user_id: userId, title, destination, start_date: startDate || null, end_date: endDate || null, status }])
-        .select('id')
-    if (error) throw error
-    return data[0].id
-}
-
-export async function insertItineraryPlace({ itineraryId, name, category, notes, costEstimate, lat, lng, displayOrder }) {
-    const { data, error } = await supabase
-        .from('itinerary_places')
-        .insert([{
-            itinerary_id: itineraryId,
-            name,
-            category,
-            notes: notes || null,
-            cost_estimate: costEstimate ?? null,
-            lat: lat ?? null,
-            lng: lng ?? null,
-            display_order: displayOrder ?? 0
-        }])
-        .select('id')
-    if (error) throw error
-    return data[0].id
-}
-
-export async function upsertItineraryBudget({ itineraryId, category, budget }) {
+export async function insertBookReview({ userId, title, author, genre, note, rating }) {
     const { error } = await supabase
-        .from('itinerary_budgets')
-        .upsert({ itinerary_id: itineraryId, category, budget }, { onConflict: 'itinerary_id,category' })
+        .from('book_reviews')
+        .insert([{ user_id: userId, title, author: author || null, genre: genre || null, note: note || null, rating }])
     if (error) throw error
 }
 
-export async function updateItineraryPlaceOrder(id, displayOrder) {
-    const { error } = await supabase
-        .from('itinerary_places')
-        .update({ display_order: displayOrder })
-        .eq('id', id)
-    if (error) throw error
-}
-
-export async function deleteItinerary(id) {
-    const { error } = await supabase.from('itineraries').delete().eq('id', id)
+export async function deleteBookReview(id) {
+    const { error } = await supabase.from('book_reviews').delete().eq('id', id)
     if (error) throw error
 }
