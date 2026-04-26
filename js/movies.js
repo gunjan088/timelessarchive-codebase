@@ -176,26 +176,19 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     }
 })
 
-function wireNavButtons() {
-    const addBtn = document.getElementById('add-review-btn')
-    if (addBtn) {
-        const fresh = addBtn.cloneNode(true)
-        addBtn.parentNode.replaceChild(fresh, addBtn)
-        fresh.addEventListener('click', () => {
-            if (!currentUser) { window.location.href = '/index.html'; return }
-            openModal()
-        })
+function wireButtons() {
+    // Sign In button (logged out only)
+    const signInBtn = document.getElementById('sign-in-btn')
+    if (signInBtn) {
+        signInBtn.addEventListener('click', () => { window.location.href = '/' })
     }
-    const wlBtn = document.getElementById('wishlist-add-btn')
-    if (wlBtn) {
-        const fresh = wlBtn.cloneNode(true)
-        wlBtn.parentNode.replaceChild(fresh, wlBtn)
-        fresh.addEventListener('click', () => {
-            if (!currentUser) { window.location.href = '/index.html'; return }
-            openWishlistModal('movies', ({ name, notes }) =>
-                insertWishlistItem({ userId: currentUser.id, category: 'movies', name, notes })
-                    .then(() => { wishlistLoaded = false })
-            )
+
+    // + Add button
+    const addBtn = document.getElementById('add-btn')
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            if (!currentUser) { showToast('Sign in to add', 'error'); return }
+            openModal()
         })
     }
 }
@@ -210,12 +203,12 @@ async function init() {
         renderNav('movies', true)
         const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
         if (profile) {
-            renderNavUser(profile.display_name, { onLogout: async () => { await supabase.auth.signOut(); location.reload() }, showAddReview: true })
+            renderNavUser(profile.display_name, { onLogout: async () => { await supabase.auth.signOut(); location.reload() } })
         }
         document.getElementById('movies-wishlist-chip')?.classList.remove('hidden')
         renderFiltered()
     }
-    wireNavButtons()
+    wireButtons()
 }
 
 init().catch(err => {
