@@ -102,7 +102,7 @@ function renderFiltered() {
     if (searchQuery) {
         const q = searchQuery.toLowerCase()
         filtered = filtered.filter(r =>
-            r.title.toLowerCase().includes(q) ||
+            (r.title || '').toLowerCase().includes(q) ||
             (r.author || '').toLowerCase().includes(q)
         )
     }
@@ -193,6 +193,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     const author = document.getElementById('book-author').value.trim()
     const note   = document.getElementById('book-note').value.trim()
     const btn    = document.getElementById('submit-btn')
+    if (!currentUser) { showToast('Sign in to add', 'error'); return }
 
     if (!title)          return showToast('Enter a title', 'error')
     if (!selectedRating) return showToast('Pick a rating', 'error')
@@ -225,6 +226,7 @@ document.getElementById('read-submit-btn').addEventListener('click', async () =>
     const author = document.getElementById('read-author').value.trim()
     const note   = document.getElementById('read-note').value.trim()
     const btn    = document.getElementById('read-submit-btn')
+    if (!currentUser) { showToast('Sign in to add', 'error'); return }
 
     if (!title) return showToast('Enter a title', 'error')
 
@@ -252,6 +254,7 @@ document.getElementById('wl-submit-btn').addEventListener('click', async () => {
     const title  = document.getElementById('wl-title').value.trim()
     const author = document.getElementById('wl-author').value.trim()
     const btn    = document.getElementById('wl-submit-btn')
+    if (!currentUser) { showToast('Sign in to add', 'error'); return }
 
     if (!title) return showToast('Enter a title', 'error')
 
