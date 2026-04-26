@@ -7,7 +7,7 @@ export function renderNav(activePage, isLoggedIn = false) {
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 sm:gap-6">
                 <a href="/index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
-                    <span class="font-bold text-base sm:text-lg tracking-tight">Somewhere Good</span>
+                    <span class="font-bold text-base sm:text-lg tracking-tight"><span class="hidden sm:inline">Somewhere Good</span><span class="sm:hidden">SG</span></span>
                 </a>
                 <nav class="flex items-center gap-0.5 sm:gap-1">
                     <a href="/index.html" class="nav-link ${activePage === 'food' ? 'nav-link-active' : ''}">🍽️<span class="hidden sm:inline"> Food</span></a>
