@@ -176,6 +176,20 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     }
 })
 
+function switchModalTab(tab) {
+    if (!tab) return
+    document.querySelectorAll('.modal-tab').forEach(btn => {
+        const isActive = btn.dataset.tab === tab
+        btn.classList.toggle('text-orange-400', isActive)
+        btn.classList.toggle('border-b-2', isActive)
+        btn.classList.toggle('border-orange-400', isActive)
+        btn.classList.toggle('-mb-px', isActive)
+        btn.classList.toggle('text-gray-500', !isActive)
+    })
+    document.getElementById('tab-review').classList.toggle('hidden', tab !== 'review')
+    document.getElementById('tab-wishlist').classList.toggle('hidden', tab !== 'wishlist')
+}
+
 function wireButtons() {
     // Sign In button (logged out only)
     const signInBtn = document.getElementById('sign-in-btn')
@@ -188,7 +202,38 @@ function wireButtons() {
     if (addBtn) {
         addBtn.addEventListener('click', () => {
             if (!currentUser) { showToast('Sign in to add', 'error'); return }
+            switchModalTab('review')
             openModal()
+        })
+    }
+
+    // Modal tabs
+    document.querySelectorAll('.modal-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchModalTab(btn.dataset.tab))
+    })
+
+    // Watchlist submit
+    const wlSubmit = document.getElementById('wl-submit-btn')
+    if (wlSubmit) {
+        wlSubmit.addEventListener('click', async () => {
+            const name = document.getElementById('wl-name').value.trim()
+            if (!name) { showToast('Enter a title', 'error'); return }
+            if (!currentUser) { showToast('Sign in to add', 'error'); return }
+            wlSubmit.textContent = 'Saving...'
+            wlSubmit.disabled = true
+            try {
+                await insertWishlistItem({ userId: currentUser.id, category: 'movies', name, notes: document.getElementById('wl-notes').value.trim() })
+                showToast('Added to watchlist 🔖')
+                wishlistLoaded = false
+                closeModal()
+                document.getElementById('wl-name').value = ''
+                document.getElementById('wl-notes').value = ''
+            } catch (err) {
+                showToast('Failed to save', 'error')
+            } finally {
+                wlSubmit.textContent = 'Save to Watchlist'
+                wlSubmit.disabled = false
+            }
         })
     }
 }

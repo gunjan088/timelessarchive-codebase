@@ -47,48 +47,70 @@
         </div>
     </main>
 
-    <!-- ADD REVIEW MODAL -->
+    <!-- ADD MOVIE MODAL -->
     <div id="modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
         <div id="modal-card" class="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-md shadow-2xl">
             <div class="flex items-center justify-between p-5 border-b border-gray-800">
-                <h2 class="text-lg font-bold">New Review</h2>
+                <h2 class="text-lg font-bold">Add</h2>
                 <button id="modal-close" class="text-gray-500 hover:text-white transition-colors text-2xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-800">&times;</button>
             </div>
-            <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Title</label>
-                    <input id="movie-title" type="text" placeholder="e.g. Inception, The Bear..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
+            <!-- Modal tabs -->
+            <div class="flex gap-1 px-5 pt-4 border-b border-gray-800 pb-0">
+                <button class="modal-tab active px-3 py-2 text-sm font-semibold text-orange-400 border-b-2 border-orange-400 -mb-px" data-tab="review">Review</button>
+                <button class="modal-tab px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-300" data-tab="wishlist">Watchlist</button>
+            </div>
+            <div class="p-5 max-h-[80vh] overflow-y-auto">
+                <!-- Review tab -->
+                <div id="tab-review" class="space-y-4">
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Type</label>
-                        <select id="movie-type" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-orange-500 transition-colors text-sm appearance-none" style="font-family:'Poppins',sans-serif">
-                            <option>Movie</option>
-                            <option>Series</option>
-                            <option>Documentary</option>
-                            <option>Other</option>
-                        </select>
+                        <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Title</label>
+                        <input id="movie-title" type="text" placeholder="e.g. Inception, The Bear..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Type</label>
+                            <select id="movie-type" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white focus:outline-none focus:border-orange-500 transition-colors text-sm appearance-none" style="font-family:'Poppins',sans-serif">
+                                <option>Movie</option>
+                                <option>Series</option>
+                                <option>Documentary</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Where to Watch</label>
+                            <input id="movie-platform" type="text" placeholder="Netflix, Prime..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Where to Watch</label>
-                        <input id="movie-platform" type="text" placeholder="Netflix, Prime..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                        <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Your Take <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
+                        <input id="movie-note" type="text" placeholder="e.g. Best heist film in years..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Your Take <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
-                    <input id="movie-note" type="text" placeholder="e.g. Best heist film in years..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Rating</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button class="rating-btn" data-value="Like"><span class="text-2xl">🔥</span><span class="text-xs font-medium mt-1 text-gray-300">Loved it</span></button>
-                        <button class="rating-btn" data-value="One-Time Try"><span class="text-2xl">🤔</span><span class="text-xs font-medium mt-1 text-gray-300">Once</span></button>
-                        <button class="rating-btn" data-value="Dislike"><span class="text-2xl">🚫</span><span class="text-xs font-medium mt-1 text-gray-300">Skip it</span></button>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Rating</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="rating-btn" data-value="Like"><span class="text-2xl">🔥</span><span class="text-xs font-medium mt-1 text-gray-300">Loved it</span></button>
+                            <button class="rating-btn" data-value="One-Time Try"><span class="text-2xl">🤔</span><span class="text-xs font-medium mt-1 text-gray-300">Once</span></button>
+                            <button class="rating-btn" data-value="Dislike"><span class="text-2xl">🚫</span><span class="text-xs font-medium mt-1 text-gray-300">Skip it</span></button>
+                        </div>
                     </div>
+                    <button id="submit-btn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold p-3 rounded-xl transition-all shadow-lg shadow-orange-500/20 text-sm">
+                        Save Review
+                    </button>
                 </div>
-                <button id="submit-btn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold p-3 rounded-xl transition-all shadow-lg shadow-orange-500/20 text-sm">
-                    Save Review
-                </button>
+                <!-- Watchlist tab -->
+                <div id="tab-wishlist" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Title</label>
+                        <input id="wl-name" type="text" placeholder="e.g. Oppenheimer, Succession..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Notes <span class="text-gray-600 normal-case font-normal">(optional)</span></label>
+                        <input id="wl-notes" type="text" placeholder="e.g. Recommended by..." class="w-full bg-gray-800 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors text-sm">
+                    </div>
+                    <button id="wl-submit-btn" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold p-3 rounded-xl transition-all shadow-lg shadow-orange-500/20 text-sm">
+                        Save to Watchlist
+                    </button>
+                </div>
             </div>
         </div>
     </div>
