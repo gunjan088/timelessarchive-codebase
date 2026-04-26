@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itineraries — Somewhere Good</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-950 min-h-screen text-white">
+
+    <header id="main-nav" class="sticky top-0 z-40 bg-gray-950/90 backdrop-blur-md border-b border-gray-800/60"></header>
+
+    <main class="max-w-4xl mx-auto px-4 py-10">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">🗺️ Itineraries</h1>
+                <p class="text-gray-400 text-sm mt-1">Trip plans and archives</p>
+            </div>
+            <button id="new-itinerary-btn" class="hidden bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20">
+                + New Itinerary
+            </button>
+        </div>
+
+        <!-- Sub-nav -->
+        <div class="flex gap-1 mb-6 border-b border-gray-800">
+            <a href="/travel/" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors">Posts</a>
+            <a href="/travel/itineraries.html" class="px-4 py-2 text-sm font-semibold text-orange-400 border-b-2 border-orange-400 -mb-px">Itineraries</a>
+        </div>
+
+        <div id="itineraries-grid" class="space-y-4"></div>
+
+        <div id="empty-state" class="hidden text-center py-20">
+            <div class="text-6xl mb-4">🗺️</div>
+            <p class="text-gray-400 text-lg font-medium">No itineraries yet</p>
+            <p class="text-gray-600 text-sm mt-1">Plan your next trip...</p>
+        </div>
+    </main>
+
+    <script type="module" src="../js/itineraries.js"></script>
+</body>
+</html>
