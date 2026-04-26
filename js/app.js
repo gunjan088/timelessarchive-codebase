@@ -189,6 +189,7 @@ async function logoutHandler() {
 let activeModalTab = 'review'
 
 function switchModalTab(tab) {
+    if (!tab) return
     activeModalTab = tab
     document.querySelectorAll('.modal-tab').forEach(btn => {
         const isActive = btn.dataset.tab === tab
@@ -393,6 +394,7 @@ function resetModal() {
     document.getElementById('manual-entry-row').classList.add('hidden')
     document.getElementById('manual-restaurant-name').value = ''
     document.getElementById('manual-confirm-msg').classList.add('hidden')
+    switchModalTab('review')
 }
 
 // ── Cuisine pills (inside modal) ───────────────────────────────────────────
