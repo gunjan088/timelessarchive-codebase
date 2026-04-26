@@ -303,3 +303,57 @@ export async function insertItineraryPlace({ itineraryId, name, category, notes,
     if (error) throw error
     return data[0].id
 }
+
+// ── Packing lists ────────────────────────────────────────────────────────────
+
+export async function fetchPackingLists() {
+    const { data, error } = await supabase
+        .from('packing_lists')
+        .select('id, name, itinerary_id, created_at, user_id, itineraries(title)')
+        .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+}
+
+export async function fetchPackingItems(listId) {
+    const { data, error } = await supabase
+        .from('packing_items')
+        .select('id, name, is_checked, display_order')
+        .eq('list_id', listId)
+        .order('display_order')
+    if (error) throw error
+    return data
+}
+
+export async function insertPackingList({ userId, name, itineraryId }) {
+    const { data, error } = await supabase
+        .from('packing_lists')
+        .insert([{ user_id: userId, name, itinerary_id: itineraryId || null }])
+        .select('id, name, itinerary_id, created_at, user_id, itineraries(title)')
+    if (error) throw error
+    return data[0]
+}
+
+export async function deletePackingList(id) {
+    const { error } = await supabase.from('packing_lists').delete().eq('id', id)
+    if (error) throw error
+}
+
+export async function insertPackingItem({ listId, name, displayOrder }) {
+    const { data, error } = await supabase
+        .from('packing_items')
+        .insert([{ list_id: listId, name, display_order: displayOrder ?? 0 }])
+        .select('id, name, is_checked, display_order')
+    if (error) throw error
+    return data[0]
+}
+
+export async function togglePackingItem(id, isChecked) {
+    const { error } = await supabase.from('packing_items').update({ is_checked: isChecked }).eq('id', id)
+    if (error) throw error
+}
+
+export async function deletePackingItem(id) {
+    const { error } = await supabase.from('packing_items').delete().eq('id', id)
+    if (error) throw error
+}
