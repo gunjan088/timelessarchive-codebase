@@ -219,12 +219,6 @@ function switchModalTab(tab) {
 }
 
 function wireButtons() {
-    // Sign In button (logged out only)
-    const signInBtn = document.getElementById('sign-in-btn')
-    if (signInBtn) {
-        signInBtn.addEventListener('click', () => { window.location.href = '/' })
-    }
-
     // + Add button
     const addBtn = document.getElementById('add-btn')
     if (addBtn) {

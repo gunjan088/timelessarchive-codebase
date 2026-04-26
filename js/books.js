@@ -220,12 +220,10 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
 
 // Read submit
 document.getElementById('read-submit-btn').addEventListener('click', async () => {
-    const title          = document.getElementById('read-title').value.trim()
-    const author         = document.getElementById('read-author').value.trim()
-    const note           = document.getElementById('read-note').value.trim()
-    const genre          = document.getElementById('read-genre').value || null
-    const goodreadsRating = document.getElementById('read-goodreads').value.trim() || null
-    const btn            = document.getElementById('read-submit-btn')
+    const title  = document.getElementById('read-title').value.trim()
+    const author = document.getElementById('read-author').value.trim()
+    const note   = document.getElementById('read-note').value.trim()
+    const btn    = document.getElementById('read-submit-btn')
     if (!currentUser) { showToast('Sign in to add', 'error'); return }
 
     if (!title) return showToast('Enter a title', 'error')
@@ -233,13 +231,11 @@ document.getElementById('read-submit-btn').addEventListener('click', async () =>
     btn.textContent = 'Saving...'
     btn.disabled = true
     try {
-        await insertBookReview({ userId: currentUser.id, title, author, genre, note, status: 'read', goodreadsRating })
+        await insertBookReview({ userId: currentUser.id, title, author, note, status: 'read' })
         showToast('Marked as read! 📖')
         closeModal()
         document.getElementById('read-title').value = ''
         document.getElementById('read-author').value = ''
-        document.getElementById('read-genre').value = ''
-        document.getElementById('read-goodreads').value = ''
         document.getElementById('read-note').value = ''
         allBooks = await fetchBookReviews()
         renderFiltered()
@@ -253,9 +249,11 @@ document.getElementById('read-submit-btn').addEventListener('click', async () =>
 
 // Wishlist submit
 document.getElementById('wl-submit-btn').addEventListener('click', async () => {
-    const title  = document.getElementById('wl-title').value.trim()
-    const author = document.getElementById('wl-author').value.trim()
-    const btn    = document.getElementById('wl-submit-btn')
+    const title          = document.getElementById('wl-title').value.trim()
+    const author         = document.getElementById('wl-author').value.trim()
+    const genre          = document.getElementById('wl-genre').value || null
+    const goodreadsRating = document.getElementById('wl-goodreads').value.trim() || null
+    const btn            = document.getElementById('wl-submit-btn')
     if (!currentUser) { showToast('Sign in to add', 'error'); return }
 
     if (!title) return showToast('Enter a title', 'error')
@@ -263,11 +261,13 @@ document.getElementById('wl-submit-btn').addEventListener('click', async () => {
     btn.textContent = 'Saving...'
     btn.disabled = true
     try {
-        await insertBookReview({ userId: currentUser.id, title, author, status: 'wishlist' })
+        await insertBookReview({ userId: currentUser.id, title, author, genre, goodreadsRating, status: 'wishlist' })
         showToast('Added to wishlist 🔖')
         closeModal()
         document.getElementById('wl-title').value = ''
         document.getElementById('wl-author').value = ''
+        document.getElementById('wl-genre').value = ''
+        document.getElementById('wl-goodreads').value = ''
         allBooks = await fetchBookReviews()
         renderFiltered()
     } catch (err) {
@@ -291,9 +291,6 @@ async function init() {
         }
     } else {
         renderNav('books', false)
-        // Wire sign-in button to redirect to home
-        const signInBtn = document.getElementById('sign-in-btn')
-        if (signInBtn) signInBtn.addEventListener('click', () => { window.location.href = '/' })
     }
 
     // Wire + Add button

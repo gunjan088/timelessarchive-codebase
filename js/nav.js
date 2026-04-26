@@ -18,9 +18,9 @@ export function renderNav(activePage, isLoggedIn = false) {
             </div>
             <div id="nav-user-area" class="flex items-center gap-2 sm:gap-3">
                 ${!isLoggedIn ? `
-                <button id="sign-in-btn" class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-3 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20 whitespace-nowrap">
+                <a href="/?return=${encodeURIComponent(window.location.pathname)}" class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-3 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20 whitespace-nowrap">
                     Sign In
-                </button>` : ''}
+                </a>` : ''}
             </div>
         </div>
     `

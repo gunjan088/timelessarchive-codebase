@@ -202,12 +202,6 @@ function switchModalTab(tab) {
 }
 
 function wireButtons() {
-    // Sign In button (logged out only)
-    const signInBtn = document.getElementById('sign-in-btn')
-    if (signInBtn) {
-        signInBtn.addEventListener('click', () => showScreen('auth'))
-    }
-
     // + Add button (always visible in filter bar)
     const addBtn = document.getElementById('add-btn')
     if (addBtn) {
@@ -254,6 +248,13 @@ function wireButtons() {
 }
 
 async function enterApp(displayName) {
+    // If user signed in from another page, send them back
+    const returnPath = new URLSearchParams(window.location.search).get('return')
+    if (returnPath && returnPath.startsWith('/') && !returnPath.startsWith('//')) {
+        window.location.href = returnPath
+        return
+    }
+
     showScreen('app')
     renderNav('food', true)
     renderNavUser(displayName, { onLogout: logoutHandler })
