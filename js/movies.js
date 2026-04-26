@@ -5,14 +5,18 @@ import { renderSkeletons, showToast, openModal, closeModal } from './ui.js'
 import { renderWishlistCards, openWishlistModal } from './wishlist.js'
 import { escapeHtml, getTimeAgo } from './utils.js'
 
+const GENRES = ['Action', 'Comedy', 'Drama', 'Thriller', 'Horror', 'Sci-Fi', 'Romance', 'Animation', 'Crime', 'Fantasy', 'Other']
+
 let currentUser = null
 let allReviews  = []
 let wishlistItems = []
 let wishlistLoaded = false
 let activeFilter = 'all'
 let activeTypeFilter = ''
+let activeGenreFilter = ''
 let searchQuery = ''
 let selectedRating = null
+let selectedGenre = null
 
 const reviewsGrid = document.getElementById('reviews-grid')
 const emptyState  = document.getElementById('empty-state')
@@ -37,6 +41,7 @@ function renderCards(reviews) {
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap mb-3">
                     <span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">${escapeHtml(r.type)}</span>
+                    ${r.genre ? `<span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">${escapeHtml(r.genre)}</span>` : ''}
                     ${r.platform ? `<span class="text-xs text-gray-500">${escapeHtml(r.platform)}</span>` : ''}
                 </div>
                 ${r.note ? `<div class="bg-gray-800/60 rounded-xl px-3 py-2.5 border border-gray-700/40 mb-2"><p class="text-sm text-gray-200 italic">"${escapeHtml(r.note)}"</p></div>` : ''}
@@ -63,6 +68,7 @@ function renderFiltered() {
     let filtered = allReviews
     if (activeFilter !== 'all') filtered = filtered.filter(r => r.rating === activeFilter)
     if (activeTypeFilter) filtered = filtered.filter(r => r.type === activeTypeFilter)
+    if (activeGenreFilter) filtered = filtered.filter(r => r.genre === activeGenreFilter)
     if (searchQuery) {
         const q = searchQuery.toLowerCase()
         filtered = filtered.filter(r => r.title.toLowerCase().includes(q))
@@ -118,6 +124,22 @@ reviewsGrid.addEventListener('click', async e => {
     }
 })
 
+function renderGenrePills() {
+    const container = document.getElementById('genre-pills')
+    if (!container) return
+    container.innerHTML = GENRES.map(g => `
+        <button class="genre-pill cuisine-pill${selectedGenre === g ? ' selected' : ''}" data-genre="${g}">${g}</button>
+    `).join('')
+    container.querySelectorAll('.genre-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedGenre = selectedGenre === btn.dataset.genre ? null : btn.dataset.genre
+            container.querySelectorAll('.genre-pill').forEach(p =>
+                p.classList.toggle('selected', p.dataset.genre === selectedGenre)
+            )
+        })
+    })
+}
+
 // ── Filters ────────────────────────────────────────────────────────────────
 document.querySelectorAll('.filter-chip').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -130,6 +152,7 @@ document.querySelectorAll('.filter-chip').forEach(btn => {
 })
 
 document.getElementById('type-filter').addEventListener('change', e => { activeTypeFilter = e.target.value; renderFiltered() })
+document.getElementById('genre-filter').addEventListener('change', e => { activeGenreFilter = e.target.value; renderFiltered() })
 document.getElementById('search-filter').addEventListener('input', e => { searchQuery = e.target.value; renderFiltered() })
 
 // ── Modal ──────────────────────────────────────────────────────────────────
@@ -158,7 +181,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     btn.textContent = 'Saving...'
     btn.disabled = true
     try {
-        await insertScreenReview({ userId: currentUser.id, title, type, platform, note, rating: selectedRating })
+        await insertScreenReview({ userId: currentUser.id, title, type, platform, note, rating: selectedRating, genre: selectedGenre })
         showToast('Review saved! 🎬')
         closeModal()
         document.getElementById('movie-title').value = ''
@@ -166,6 +189,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
         document.getElementById('movie-note').value = ''
         document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'))
         selectedRating = null
+        selectedGenre = null
         allReviews = await fetchScreenReviews()
         renderFiltered()
     } catch (err) {
@@ -203,6 +227,8 @@ function wireButtons() {
         addBtn.addEventListener('click', () => {
             if (!currentUser) { showToast('Sign in to add', 'error'); return }
             switchModalTab('review')
+            selectedGenre = null
+            renderGenrePills()
             openModal()
         })
     }

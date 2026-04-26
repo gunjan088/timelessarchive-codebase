@@ -191,7 +191,7 @@ export async function fetchScreenReviews() {
     const [reviewsRes, profilesRes] = await Promise.all([
         supabase
             .from('screen_reviews')
-            .select('id, title, type, platform, note, rating, created_at, user_id')
+            .select('id, title, type, platform, note, rating, genre, created_at, user_id')
             .order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, display_name')
     ])
@@ -201,10 +201,10 @@ export async function fetchScreenReviews() {
     return reviewsRes.data.map(r => ({ ...r, profiles: profileMap[r.user_id] || null }))
 }
 
-export async function insertScreenReview({ userId, title, type, platform, note, rating }) {
+export async function insertScreenReview({ userId, title, type, platform, note, rating, genre }) {
     const { error } = await supabase
         .from('screen_reviews')
-        .insert([{ user_id: userId, title, type, platform: platform || null, note: note || null, rating }])
+        .insert([{ user_id: userId, title, type, platform: platform || null, note: note || null, rating, genre: genre || null }])
     if (error) throw error
 }
 
