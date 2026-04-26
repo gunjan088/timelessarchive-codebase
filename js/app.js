@@ -62,6 +62,12 @@ async function init() {
         document.getElementById('wishlist-chip')?.classList.remove('hidden')
     } else {
         renderNav('food', false)
+        // If arrived via Sign In link from another page, show auth screen directly
+        const returnPath = new URLSearchParams(window.location.search).get('return')
+        if (returnPath) {
+            showScreen('auth')
+            return
+        }
     }
 
     wireButtons()
