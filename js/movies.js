@@ -2,7 +2,7 @@ import { supabase } from './config.js'
 import { fetchScreenReviews, insertScreenReview, deleteScreenReview, fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { renderSkeletons, showToast, openModal, closeModal } from './ui.js'
-import { renderWishlistCards, openWishlistModal } from './wishlist.js'
+import { renderWishlistCards } from './wishlist.js'
 import { escapeHtml, getTimeAgo } from './utils.js'
 
 const GENRES = ['Action', 'Comedy', 'Drama', 'Thriller', 'Horror', 'Sci-Fi', 'Romance', 'Animation', 'Crime', 'Fantasy', 'Other']
@@ -175,6 +175,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     const note  = document.getElementById('movie-note').value.trim()
     const btn   = document.getElementById('submit-btn')
 
+    if (!currentUser)    return showToast('Sign in to add', 'error')
     if (!title)          return showToast('Enter a title', 'error')
     if (!selectedRating) return showToast('Pick a rating', 'error')
 
