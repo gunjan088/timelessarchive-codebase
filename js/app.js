@@ -45,26 +45,28 @@ function showScreen(name) {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init() {
-    // Always show the app and load the feed — auth is only needed to add reviews
     showScreen('app')
-    renderNav('food', false)
-    wireNavButtons()
-    await loadFeed()
-    setupRealtime()
 
-    // Silently check if user is already logged in
+    // Resolve auth before rendering nav — prevents Add Review button from
+    // briefly existing with currentUser=null and redirecting logged-in users
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
         currentUser = user
         const profile = await getProfile(user.id)
         if (!profile) {
             showScreen('profile')
-        } else {
-            renderNav('food', true)
-            renderNavUser(profile.display_name, { onLogout: logoutHandler, showAddReview: true })
-            wireNavButtons()
+            return
         }
+        renderNav('food', true)
+        renderNavUser(profile.display_name, { onLogout: logoutHandler, showAddReview: true })
+        document.getElementById('wishlist-chip')?.classList.remove('hidden')
+    } else {
+        renderNav('food', false)
     }
+
+    wireNavButtons()
+    await loadFeed()
+    setupRealtime()
 }
 
 // ── Auth tabs ──────────────────────────────────────────────────────────────
