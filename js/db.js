@@ -229,10 +229,18 @@ export async function fetchBookReviews() {
     return reviewsRes.data.map(r => ({ ...r, profiles: profileMap[r.user_id] || null }))
 }
 
-export async function insertBookReview({ userId, title, author, genre, note, rating }) {
+export async function insertBookReview({ userId, title, author, genre, note, rating, status = 'review' }) {
     const { error } = await supabase
         .from('book_reviews')
-        .insert([{ user_id: userId, title, author: author || null, genre: genre || null, note: note || null, rating }])
+        .insert([{
+            user_id: userId,
+            title,
+            author: author || null,
+            genre: genre || null,
+            note: note || null,
+            rating: rating || null,
+            status
+        }])
     if (error) throw error
 }
 
