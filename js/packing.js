@@ -7,6 +7,7 @@ import { escapeHtml } from './utils.js'
 
 let currentUser = null
 let lists = []
+let itineraryMap = {}  // id -> title
 const itemCache = {}   // listId -> items[]
 const expanded = new Set()
 
@@ -57,8 +58,9 @@ function renderLists() {
         const items = itemCache[l.id]
         const isExpanded = expanded.has(l.id)
         const isOwner = l.user_id === currentUser?.id
-        const tripLabel = l.itineraries?.title
-            ? `<span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">✈️ ${escapeHtml(l.itineraries.title)}</span>`
+        const itinTitle = l.itinerary_id ? itineraryMap[l.itinerary_id] : null
+        const tripLabel = itinTitle
+            ? `<span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">✈️ ${escapeHtml(itinTitle)}</span>`
             : '<span class="text-xs text-gray-600">General</span>'
         return `
             <div class="bg-gray-900 rounded-2xl border border-gray-800 p-4" id="list-card-${escapeHtml(l.id)}">
@@ -226,9 +228,10 @@ async function init() {
         }
         document.getElementById('new-list-btn').classList.remove('hidden')
 
-        // Populate itinerary dropdown
+        // Populate itinerary dropdown and build map
         try {
             const itins = await fetchItineraries()
+            itins.forEach(it => { itineraryMap[it.id] = it.title })
             const sel = document.getElementById('new-list-itinerary')
             itins.forEach(it => {
                 const opt = document.createElement('option')

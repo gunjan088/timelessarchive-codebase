@@ -309,7 +309,7 @@ export async function insertItineraryPlace({ itineraryId, name, category, notes,
 export async function fetchPackingLists() {
     const { data, error } = await supabase
         .from('packing_lists')
-        .select('id, name, itinerary_id, created_at, user_id, itineraries(title)')
+        .select('id, name, itinerary_id, created_at, user_id')
         .order('created_at', { ascending: false })
     if (error) throw error
     return data
@@ -334,7 +334,7 @@ export async function insertPackingList({ userId, name, itineraryId }) {
     const id = data[0].id
     const { data: full, error: err2 } = await supabase
         .from('packing_lists')
-        .select('id, name, itinerary_id, created_at, user_id, itineraries(title)')
+        .select('id, name, itinerary_id, created_at, user_id')
         .eq('id', id)
         .maybeSingle()
     if (err2) throw err2
