@@ -50,6 +50,7 @@ function renderCards(books) {
                 <div class="flex items-center gap-1.5 flex-wrap mb-3">
                     ${r.author ? `<span class="text-xs text-gray-400 italic">${escapeHtml(r.author)}</span>` : ''}
                     ${r.genre ? `<span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">${escapeHtml(r.genre)}</span>` : ''}
+                    ${r.goodreads_rating ? `<span class="text-xs text-green-400">★ ${escapeHtml(r.goodreads_rating)}</span>` : ''}
                 </div>
                 ${r.note ? `<div class="bg-gray-800/60 rounded-xl px-3 py-2.5 border border-gray-700/40 mb-2"><p class="text-sm text-gray-200 italic">"${escapeHtml(r.note)}"</p></div>` : ''}
                 <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-800/80">
@@ -94,7 +95,14 @@ function renderFiltered() {
             (r.status === 'read' || r.status === 'review') &&
             new Date(r.created_at).getFullYear() === thisYear
         )
-    } else if (activeFilter !== 'all') {
+        // read is private — only show current user's
+        filtered = filtered.filter(r => r.status === 'review' || r.user_id === currentUser?.id)
+    } else if (activeFilter === 'all') {
+        // review = public, read/wishlist = private (current user only)
+        filtered = filtered.filter(r => r.status === 'review' || r.user_id === currentUser?.id)
+    } else if (activeFilter === 'read' || activeFilter === 'wishlist') {
+        filtered = filtered.filter(r => r.status === activeFilter && r.user_id === currentUser?.id)
+    } else {
         filtered = filtered.filter(r => r.status === activeFilter)
     }
 
@@ -222,10 +230,12 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
 
 // Read submit
 document.getElementById('read-submit-btn').addEventListener('click', async () => {
-    const title  = document.getElementById('read-title').value.trim()
-    const author = document.getElementById('read-author').value.trim()
-    const note   = document.getElementById('read-note').value.trim()
-    const btn    = document.getElementById('read-submit-btn')
+    const title          = document.getElementById('read-title').value.trim()
+    const author         = document.getElementById('read-author').value.trim()
+    const note           = document.getElementById('read-note').value.trim()
+    const genre          = document.getElementById('read-genre').value || null
+    const goodreadsRating = document.getElementById('read-goodreads').value.trim() || null
+    const btn            = document.getElementById('read-submit-btn')
     if (!currentUser) { showToast('Sign in to add', 'error'); return }
 
     if (!title) return showToast('Enter a title', 'error')
@@ -233,11 +243,13 @@ document.getElementById('read-submit-btn').addEventListener('click', async () =>
     btn.textContent = 'Saving...'
     btn.disabled = true
     try {
-        await insertBookReview({ userId: currentUser.id, title, author, note, status: 'read' })
+        await insertBookReview({ userId: currentUser.id, title, author, genre, note, status: 'read', goodreadsRating })
         showToast('Marked as read! 📖')
         closeModal()
         document.getElementById('read-title').value = ''
         document.getElementById('read-author').value = ''
+        document.getElementById('read-genre').value = ''
+        document.getElementById('read-goodreads').value = ''
         document.getElementById('read-note').value = ''
         allBooks = await fetchBookReviews()
         renderFiltered()

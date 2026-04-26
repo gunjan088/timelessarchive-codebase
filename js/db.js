@@ -226,7 +226,7 @@ export async function fetchBookReviews() {
     const [reviewsRes, profilesRes] = await Promise.all([
         supabase
             .from('book_reviews')
-            .select('id, title, author, genre, note, rating, status, created_at, user_id')
+            .select('id, title, author, genre, note, rating, status, goodreads_rating, created_at, user_id')
             .order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, display_name')
     ])
@@ -236,7 +236,7 @@ export async function fetchBookReviews() {
     return reviewsRes.data.map(r => ({ ...r, profiles: profileMap[r.user_id] || null }))
 }
 
-export async function insertBookReview({ userId, title, author, genre, note, rating, status = 'review' }) {
+export async function insertBookReview({ userId, title, author, genre, note, rating, status = 'review', goodreadsRating }) {
     const { error } = await supabase
         .from('book_reviews')
         .insert([{
@@ -246,7 +246,8 @@ export async function insertBookReview({ userId, title, author, genre, note, rat
             genre: genre || null,
             note: note || null,
             rating: rating || null,
-            status
+            status,
+            goodreads_rating: goodreadsRating || null
         }])
     if (error) throw error
 }
