@@ -1,25 +1,10 @@
 import { supabase } from './config.js'
 import { fetchTravelPost } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
-
-function escapeHtml(str) {
-    if (!str) return ''
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-function typeStyle(type) {
-    if (type === 'Eat')  return 'bg-orange-900/40 text-orange-400 border-orange-800/60'
-    if (type === 'Stay') return 'bg-blue-900/40 text-blue-400 border-blue-800/60'
-    if (type === 'Do')   return 'bg-green-900/40 text-green-400 border-green-800/60'
-    return 'bg-purple-900/40 text-purple-400 border-purple-800/60'
-}
-
-function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
-}
+import { escapeHtml, formatDate, typeStyle } from './utils.js'
 
 function renderPost(post, places, isAuthor) {
-    document.title = `${post.title} — Travel`
+    document.title = `${post.title} — Somewhere Good`
     const area = document.getElementById('post-content-area')
 
     const placesHtml = places.length ? `

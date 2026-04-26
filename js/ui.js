@@ -1,3 +1,5 @@
+import { escapeHtml, getTimeAgo } from './utils.js'
+
 const CUISINES = [
     'South Indian', 'North Indian', 'Cafe', 'Brewery',
     'Chinese', 'Italian', 'Seafood', 'Street Food', 'Other'
@@ -101,30 +103,9 @@ function buildCard(r, i, currentUserId) {
 }
 
 function getRatingBadge(rating) {
-    if (rating === 'Like')         return { badge: '🔥 Loved',   badgeClass: 'bg-green-900/40 text-green-400 border-green-800/60' }
-    if (rating === 'Dislike')      return { badge: '🚫 Skip',    badgeClass: 'bg-red-900/40 text-red-400 border-red-800/60' }
-    return                                { badge: '🤔 Once',    badgeClass: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/60' }
-}
-
-function getTimeAgo(dateString) {
-    const diff = Date.now() - new Date(dateString).getTime()
-    const mins = Math.floor(diff / 60000)
-    if (mins < 1)  return 'just now'
-    if (mins < 60) return `${mins}m ago`
-    const hrs = Math.floor(mins / 60)
-    if (hrs < 24)  return `${hrs}h ago`
-    const days = Math.floor(hrs / 24)
-    if (days < 30) return `${days}d ago`
-    return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-}
-
-function escapeHtml(str) {
-    if (!str) return ''
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+    if (rating === 'Like')    return { badge: '🔥 Loved', badgeClass: 'bg-green-900/40 text-green-400 border-green-800/60' }
+    if (rating === 'Dislike') return { badge: '🚫 Skip',  badgeClass: 'bg-red-900/40 text-red-400 border-red-800/60' }
+    return                           { badge: '🤔 Once',  badgeClass: 'bg-yellow-900/40 text-yellow-400 border-yellow-800/60' }
 }
 
 // ── Cuisine pills (modal) ──────────────────────────────────────────────────

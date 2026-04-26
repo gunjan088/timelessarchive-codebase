@@ -3,6 +3,7 @@ import { fetchScreenReviews, insertScreenReview, deleteScreenReview, fetchWishli
 import { renderNav, renderNavUser } from './nav.js'
 import { renderSkeletons, showToast, openModal, closeModal } from './ui.js'
 import { renderWishlistCards, openWishlistModal } from './wishlist.js'
+import { escapeHtml, getTimeAgo } from './utils.js'
 
 let currentUser = null
 let allReviews  = []
@@ -15,22 +16,6 @@ let selectedRating = null
 
 const reviewsGrid = document.getElementById('reviews-grid')
 const emptyState  = document.getElementById('empty-state')
-
-function escapeHtml(str) {
-    if (!str) return ''
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-function getTimeAgo(dateString) {
-    const diff = Date.now() - new Date(dateString).getTime()
-    const mins = Math.floor(diff / 60000)
-    if (mins < 1)  return 'just now'
-    if (mins < 60) return `${mins}m ago`
-    const hrs = Math.floor(mins / 60)
-    if (hrs < 24)  return `${hrs}h ago`
-    const days = Math.floor(hrs / 24)
-    return days < 30 ? `${days}d ago` : new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-}
 
 function getRatingBadge(rating) {
     if (rating === 'Like')        return { badge: '🔥 Loved',   cls: 'bg-green-900/40 text-green-400 border-green-800/60' }

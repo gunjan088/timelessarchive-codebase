@@ -1,21 +1,6 @@
 import { deleteWishlistItem } from './db.js'
 import { showToast } from './ui.js'
-
-function escapeHtml(str) {
-    if (!str) return ''
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-function getTimeAgo(dateString) {
-    const diff = Date.now() - new Date(dateString).getTime()
-    const mins = Math.floor(diff / 60000)
-    if (mins < 1)  return 'just now'
-    if (mins < 60) return `${mins}m ago`
-    const hrs = Math.floor(mins / 60)
-    if (hrs < 24)  return `${hrs}h ago`
-    const days = Math.floor(hrs / 24)
-    return days < 30 ? `${days}d ago` : new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-}
+import { escapeHtml, getTimeAgo } from './utils.js'
 
 export function renderWishlistCards(items, container, emptyState, onMarkVisited) {
     if (!items.length) {

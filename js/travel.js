@@ -1,26 +1,17 @@
 import { supabase } from './config.js'
-import { fetchTravelPosts, deleteTravelPost } from './db.js'
-import { fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
+import { fetchTravelPosts, deleteTravelPost, fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
 import { renderWishlistCards, openWishlistModal } from './wishlist.js'
+import { escapeHtml, formatDate } from './utils.js'
 
 let currentUser = null
 let wishlistItems = []
 let wishlistLoaded = false
 let activeFilter = 'all'
 
-function escapeHtml(str) {
-    if (!str) return ''
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
 function getExcerpt(content, maxLen = 160) {
     return content.length > maxLen ? content.slice(0, maxLen).trimEnd() + '…' : content
-}
-
-function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 function renderPosts(posts) {
@@ -74,7 +65,7 @@ async function loadTravelWishlist() {
 }
 
 function handleMarkVisited(wishlistId) {
-    deleteWishlistItem(wishlistId).catch(() => {})
+    deleteWishlistItem(wishlistId).catch(() => showToast('Failed to remove', 'error'))
     wishlistItems = wishlistItems.filter(i => i.id !== wishlistId)
     wishlistLoaded = false
     showToast('Removed from wishlist')

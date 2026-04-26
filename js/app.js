@@ -1,15 +1,16 @@
 import { supabase } from './config.js'
 import {
     fetchReviews, insertRestaurant, insertReview,
-    getProfile, upsertProfile, getUniqueCuisines, subscribeToReviews, deleteReview, isUsernameTaken
+    getProfile, upsertProfile, getUniqueCuisines, subscribeToReviews, deleteReview,
+    fetchWishlist, insertWishlistItem, deleteWishlistItem
 } from './db.js'
 import {
     renderSkeletons, renderCards, renderCuisinePills,
     renderCuisineFilter, showToast, openModal, closeModal
 } from './ui.js'
 import { renderNav, renderNavUser } from './nav.js'
-import { fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
 import { renderWishlistCards, openWishlistModal } from './wishlist.js'
+import { escapeHtml } from './utils.js'
 
 // ── State ──────────────────────────────────────────────────────────────────
 let currentUser   = null
@@ -385,8 +386,8 @@ searchInput.addEventListener('input', e => {
                     const li = document.createElement('li')
                     li.className = 'p-3 hover:bg-gray-700 cursor-pointer transition-colors'
                     li.innerHTML = `
-                        <div class="font-semibold text-white text-sm">${shortName}</div>
-                        <div class="text-xs text-gray-400 truncate mt-0.5">${place.display_name}</div>
+                        <div class="font-semibold text-white text-sm">${escapeHtml(shortName)}</div>
+                        <div class="text-xs text-gray-400 truncate mt-0.5">${escapeHtml(place.display_name)}</div>
                     `
                     li.onclick = () => {
                         searchInput.value = shortName

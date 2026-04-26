@@ -2,21 +2,10 @@ import { supabase } from './config.js'
 import { insertTravelPost, insertTravelPlace } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
+import { escapeHtml, typeStyle } from './utils.js'
 
 let currentUser = null
 let places = []
-
-function escapeHtml(str) {
-    if (!str) return ''
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-function typeStyle(type) {
-    if (type === 'Eat')  return 'bg-orange-900/40 text-orange-400 border-orange-800/60'
-    if (type === 'Stay') return 'bg-blue-900/40 text-blue-400 border-blue-800/60'
-    if (type === 'Do')   return 'bg-green-900/40 text-green-400 border-green-800/60'
-    return 'bg-purple-900/40 text-purple-400 border-purple-800/60'
-}
 
 function renderPlaces() {
     const list = document.getElementById('places-list')

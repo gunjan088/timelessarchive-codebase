@@ -1,10 +1,4 @@
-function esc(str) {
-    return String(str || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
+import { escapeHtml } from './utils.js'
 
 export function renderNav(activePage, isLoggedIn = false) {
     const nav = document.getElementById('main-nav')
@@ -38,9 +32,9 @@ export function renderNavUser(name, { onLogout, showAddReview = false }) {
     area.innerHTML = `
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                ${esc(name.charAt(0).toUpperCase())}
+                ${escapeHtml(name.charAt(0).toUpperCase())}
             </div>
-            <span class="text-sm text-gray-300 hidden sm:block">${esc(name)}</span>
+            <span class="text-sm text-gray-300 hidden sm:block">${escapeHtml(name)}</span>
         </div>
         ${showAddReview ? `<button id="add-review-btn" class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-3 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20 whitespace-nowrap">
             <span class="text-base leading-none font-bold">+</span>
