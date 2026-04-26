@@ -36,7 +36,7 @@ export function renderNavUser(name, { onLogout }) {
             </div>
             <span class="text-sm text-gray-300 hidden sm:block">${escapeHtml(name || '')}</span>
         </div>
-        <button id="logout-btn" class="text-gray-600 hover:text-gray-400 text-xs transition-colors hidden sm:block">Logout</button>
+        <button id="logout-btn" class="text-gray-500 hover:text-white text-xs transition-colors border border-gray-700 hover:border-gray-500 px-2.5 py-1.5 rounded-lg">Logout</button>
     `
     document.getElementById('logout-btn')?.addEventListener('click', onLogout)
 }
