@@ -18,16 +18,15 @@ export function renderNav(activePage, isLoggedIn = false) {
             </div>
             <div id="nav-user-area" class="flex items-center gap-2 sm:gap-3">
                 ${!isLoggedIn ? `
-                <button id="add-review-btn" class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-3 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20 whitespace-nowrap">
-                    <span class="text-base leading-none font-bold">+</span>
-                    <span class="hidden sm:inline">Add Review</span>
+                <button id="sign-in-btn" class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-3 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20 whitespace-nowrap">
+                    Sign In
                 </button>` : ''}
             </div>
         </div>
     `
 }
 
-export function renderNavUser(name, { onLogout, showAddReview = false }) {
+export function renderNavUser(name, { onLogout }) {
     const area = document.getElementById('nav-user-area')
     if (!area) return
     area.innerHTML = `
@@ -37,11 +36,6 @@ export function renderNavUser(name, { onLogout, showAddReview = false }) {
             </div>
             <span class="text-sm text-gray-300 hidden sm:block">${escapeHtml(name)}</span>
         </div>
-        ${showAddReview ? `<button id="add-review-btn" class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-3 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20 whitespace-nowrap">
-            <span class="text-base leading-none font-bold">+</span>
-            <span class="hidden sm:inline">Add Review</span>
-        </button>` : ''}
-        <button id="wishlist-add-btn" class="text-gray-500 hover:text-orange-400 transition-colors text-sm px-2" title="Add to wishlist">🔖</button>
         <button id="logout-btn" class="text-gray-600 hover:text-gray-400 text-xs transition-colors hidden sm:block">Logout</button>
     `
     document.getElementById('logout-btn')?.addEventListener('click', onLogout)
