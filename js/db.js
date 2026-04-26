@@ -329,9 +329,16 @@ export async function insertPackingList({ userId, name, itineraryId }) {
     const { data, error } = await supabase
         .from('packing_lists')
         .insert([{ user_id: userId, name, itinerary_id: itineraryId || null }])
-        .select('id, name, itinerary_id, created_at, user_id, itineraries(title)')
+        .select('id')
     if (error) throw error
-    return data[0]
+    const id = data[0].id
+    const { data: full, error: err2 } = await supabase
+        .from('packing_lists')
+        .select('id, name, itinerary_id, created_at, user_id, itineraries(title)')
+        .eq('id', id)
+        .maybeSingle()
+    if (err2) throw err2
+    return full
 }
 
 export async function deletePackingList(id) {
