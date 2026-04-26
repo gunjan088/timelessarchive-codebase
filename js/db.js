@@ -158,3 +158,57 @@ export async function deleteTravelPost(id) {
     const { error } = await supabase.from('travel_posts').delete().eq('id', id)
     if (error) throw error
 }
+
+// ── Wishlist ────────────────────────────────────────────────────────────────
+
+export async function fetchWishlist(category) {
+    const { data, error } = await supabase
+        .from('wishlists')
+        .select('id, name, notes, created_at')
+        .eq('category', category)
+        .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+}
+
+export async function insertWishlistItem({ userId, category, name, notes }) {
+    const { data, error } = await supabase
+        .from('wishlists')
+        .insert([{ user_id: userId, category, name, notes: notes || null }])
+        .select('id')
+    if (error) throw error
+    return data[0].id
+}
+
+export async function deleteWishlistItem(id) {
+    const { error } = await supabase.from('wishlists').delete().eq('id', id)
+    if (error) throw error
+}
+
+// ── Screen reviews ──────────────────────────────────────────────────────────
+
+export async function fetchScreenReviews() {
+    const [reviewsRes, profilesRes] = await Promise.all([
+        supabase
+            .from('screen_reviews')
+            .select('id, title, type, platform, note, rating, created_at, user_id')
+            .order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id, display_name')
+    ])
+    if (reviewsRes.error) throw reviewsRes.error
+    const profileMap = {}
+    if (profilesRes.data) profilesRes.data.forEach(p => { profileMap[p.id] = p })
+    return reviewsRes.data.map(r => ({ ...r, profiles: profileMap[r.user_id] || null }))
+}
+
+export async function insertScreenReview({ userId, title, type, platform, note, rating }) {
+    const { error } = await supabase
+        .from('screen_reviews')
+        .insert([{ user_id: userId, title, type, platform: platform || null, note: note || null, rating }])
+    if (error) throw error
+}
+
+export async function deleteScreenReview(id) {
+    const { error } = await supabase.from('screen_reviews').delete().eq('id', id)
+    if (error) throw error
+}

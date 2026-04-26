@@ -8,6 +8,8 @@ import {
     renderCuisineFilter, showToast, openModal, closeModal
 } from './ui.js'
 import { renderNav, renderNavUser } from './nav.js'
+import { fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
+import { renderWishlistCards, openWishlistModal } from './wishlist.js'
 
 // ── State ──────────────────────────────────────────────────────────────────
 let currentUser   = null
@@ -18,6 +20,8 @@ let allReviews    = []
 let activeFilter  = 'all'
 let activeCuisineFilter = ''
 let searchQuery   = ''
+let wishlistItems = []
+let wishlistLoaded = false
 
 // ── DOM refs ───────────────────────────────────────────────────────────────
 const authScreen    = document.getElementById('auth-screen')
@@ -169,6 +173,12 @@ async function logoutHandler() {
     try { await supabase.auth.signOut() } catch (_) {}
     currentUser = null
     renderNav('food', false)
+    document.getElementById('wishlist-chip')?.classList.add('hidden')
+    if (activeFilter === 'wishlist') {
+        activeFilter = 'all'
+        document.querySelector('[data-filter="all"]')?.classList.add('active')
+        document.getElementById('wishlist-chip')?.classList.remove('active')
+    }
     // Re-render cards to remove delete buttons
     renderFiltered()
 }
@@ -183,6 +193,18 @@ function wireNavButtons() {
         resetModal()
         openModal()
     })
+    const wlBtn = document.getElementById('wishlist-add-btn')
+    if (wlBtn) {
+        const freshWl = wlBtn.cloneNode(true)
+        wlBtn.parentNode.replaceChild(freshWl, wlBtn)
+        freshWl.addEventListener('click', () => {
+            if (!currentUser) { showScreen('auth'); return }
+            openWishlistModal('food', ({ name, notes }) =>
+                insertWishlistItem({ userId: currentUser.id, category: 'food', name, notes })
+                    .then(() => { wishlistLoaded = false })
+            )
+        })
+    }
 }
 
 async function enterApp(displayName) {
@@ -190,6 +212,7 @@ async function enterApp(displayName) {
     renderNav('food', true)
     renderNavUser(displayName, { onLogout: logoutHandler, showAddReview: true })
     wireNavButtons()
+    document.getElementById('wishlist-chip')?.classList.remove('hidden')
     // Only reload feed if needed (first load already happened in init)
     if (!allReviews.length) {
         await loadFeed()
@@ -216,6 +239,10 @@ async function loadFeed() {
 }
 
 function renderFiltered() {
+    if (activeFilter === 'wishlist') {
+        renderWishlistCards(wishlistItems, reviewsGrid, emptyState, handleMarkVisited)
+        return
+    }
     let filtered = allReviews
     if (activeFilter !== 'all') {
         filtered = filtered.filter(r => r.rating === activeFilter)
@@ -231,6 +258,28 @@ function renderFiltered() {
         )
     }
     renderCards(filtered, reviewsGrid, emptyState, currentUser?.id)
+}
+
+async function loadWishlist() {
+    renderSkeletons(reviewsGrid, 3)
+    try {
+        wishlistItems = await fetchWishlist('food')
+        wishlistLoaded = true
+        renderFiltered()
+    } catch (err) {
+        showToast('Failed to load wishlist', 'error')
+        renderCards([], reviewsGrid, emptyState)
+    }
+}
+
+async function handleMarkVisited(wishlistId, name) {
+    await deleteWishlistItem(wishlistId)
+    wishlistItems = wishlistItems.filter(i => i.id !== wishlistId)
+    wishlistLoaded = false
+    resetModal()
+    document.getElementById('restaurant-search').value = name
+    openModal()
+    showToast(`Opening review for "${name}"`)
 }
 
 // ── Delete ─────────────────────────────────────────────────────────────────
@@ -258,6 +307,7 @@ document.querySelectorAll('.filter-chip').forEach(btn => {
         document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'))
         btn.classList.add('active')
         activeFilter = btn.dataset.filter
+        if (activeFilter === 'wishlist' && !wishlistLoaded) { loadWishlist(); return }
         renderFiltered()
     })
 })

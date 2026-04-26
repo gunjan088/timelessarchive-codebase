@@ -13,12 +13,12 @@ export function renderNav(activePage, isLoggedIn = false) {
         <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div class="flex items-center gap-6">
                 <a href="/index.html" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                    <span class="text-xl">🍽️</span>
-                    <span class="font-bold text-lg tracking-tight">BLR Bites</span>
+                    <span class="font-bold text-lg tracking-tight">Somewhere Good</span>
                 </a>
                 <nav class="flex items-center gap-1">
-                    <a href="/index.html" class="nav-link ${activePage === 'food' ? 'nav-link-active' : ''}">Food</a>
+                    <a href="/index.html" class="nav-link ${activePage === 'food' ? 'nav-link-active' : ''}">🍽️ Food</a>
                     <a href="/travel.html" class="nav-link ${activePage === 'travel' ? 'nav-link-active' : ''}">✈️ Travel</a>
+                    <a href="/movies.html" class="nav-link ${activePage === 'movies' ? 'nav-link-active' : ''}">🎬 Movies</a>
                 </nav>
             </div>
             <div id="nav-user-area" class="flex items-center gap-2 sm:gap-3">
@@ -46,6 +46,7 @@ export function renderNavUser(name, { onLogout, showAddReview = false }) {
             <span class="text-base leading-none font-bold">+</span>
             <span class="hidden sm:inline">Add Review</span>
         </button>` : ''}
+        <button id="wishlist-add-btn" class="text-gray-500 hover:text-orange-400 transition-colors text-sm px-2" title="Add to wishlist">🔖</button>
         <button id="logout-btn" class="text-gray-600 hover:text-gray-400 text-xs transition-colors hidden sm:block">Logout</button>
     `
     document.getElementById('logout-btn')?.addEventListener('click', onLogout)

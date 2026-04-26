@@ -1,9 +1,14 @@
 import { supabase } from './config.js'
 import { fetchTravelPosts, deleteTravelPost } from './db.js'
+import { fetchWishlist, insertWishlistItem, deleteWishlistItem } from './db.js'
 import { renderNav, renderNavUser } from './nav.js'
 import { showToast } from './ui.js'
+import { renderWishlistCards, openWishlistModal } from './wishlist.js'
 
 let currentUser = null
+let wishlistItems = []
+let wishlistLoaded = false
+let activeFilter = 'all'
 
 function escapeHtml(str) {
     if (!str) return ''
@@ -56,6 +61,25 @@ async function loadPosts() {
     }
 }
 
+async function loadTravelWishlist() {
+    const postsGrid = document.getElementById('posts-grid')
+    postsGrid.innerHTML = '<p class="text-gray-600 text-sm col-span-full text-center py-8">Loading...</p>'
+    try {
+        wishlistItems = await fetchWishlist('travel')
+        wishlistLoaded = true
+        renderWishlistCards(wishlistItems, postsGrid, document.getElementById('empty-state'), handleMarkVisited)
+    } catch (err) {
+        showToast('Failed to load wishlist', 'error')
+    }
+}
+
+function handleMarkVisited(wishlistId) {
+    deleteWishlistItem(wishlistId).catch(() => {})
+    wishlistItems = wishlistItems.filter(i => i.id !== wishlistId)
+    wishlistLoaded = false
+    showToast('Removed from wishlist')
+}
+
 async function init() {
     const { data: { user } } = await supabase.auth.getUser()
     currentUser = user
@@ -73,7 +97,37 @@ async function init() {
             newPostBtn.classList.remove('hidden')
             newPostBtn.addEventListener('click', () => { window.location.href = '/travel-write.html' })
         }
+
+        document.getElementById('travel-wishlist-chip')?.classList.remove('hidden')
+
+        // Add wishlist button
+        const wlBtn = document.createElement('button')
+        wlBtn.className = 'text-gray-500 hover:text-orange-400 transition-colors text-sm px-3 py-2 rounded-xl hover:bg-gray-800'
+        wlBtn.textContent = '🔖 Add to Wishlist'
+        wlBtn.addEventListener('click', () => {
+            openWishlistModal('travel', ({ name, notes }) =>
+                insertWishlistItem({ userId: currentUser.id, category: 'travel', name, notes })
+                    .then(() => { wishlistLoaded = false; showToast('Added to wishlist 🔖') })
+            )
+        })
+        // Append to the actions area (the flex div that has the "+ New Post" button)
+        const actionsDiv = document.querySelector('#new-post-btn')?.parentElement
+        if (actionsDiv) actionsDiv.appendChild(wlBtn)
     }
+
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'))
+            btn.classList.add('active')
+            activeFilter = btn.dataset.filter
+            if (activeFilter === 'wishlist') {
+                if (!wishlistLoaded) loadTravelWishlist()
+                else renderWishlistCards(wishlistItems, document.getElementById('posts-grid'), document.getElementById('empty-state'), handleMarkVisited)
+            } else {
+                loadPosts()
+            }
+        })
+    })
 
     await loadPosts()
 

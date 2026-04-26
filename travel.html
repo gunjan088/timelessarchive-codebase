@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel — Timeless Archive</title>
+    <title>Travel — Somewhere Good</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/style.css">
@@ -21,6 +21,12 @@
             <button id="new-post-btn" class="hidden bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-lg shadow-orange-500/20">
                 + New Post
             </button>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-6">
+            <button class="filter-chip active" data-filter="all">All Posts</button>
+            <button class="filter-chip hidden" data-filter="wishlist" id="travel-wishlist-chip">🔖 Wishlist</button>
         </div>
 
         <div id="posts-grid" class="space-y-4"></div>
