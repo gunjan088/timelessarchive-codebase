@@ -219,7 +219,7 @@ export async function fetchBookReviews() {
     const [reviewsRes, profilesRes] = await Promise.all([
         supabase
             .from('book_reviews')
-            .select('id, title, author, genre, note, rating, created_at, user_id')
+            .select('id, title, author, genre, note, rating, status, created_at, user_id')
             .order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, display_name')
     ])
