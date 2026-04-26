@@ -32,9 +32,9 @@ export function renderNavUser(name, { onLogout }) {
     area.innerHTML = `
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                ${escapeHtml(name.charAt(0).toUpperCase())}
+                ${escapeHtml((name || '?').charAt(0).toUpperCase())}
             </div>
-            <span class="text-sm text-gray-300 hidden sm:block">${escapeHtml(name)}</span>
+            <span class="text-sm text-gray-300 hidden sm:block">${escapeHtml(name || '')}</span>
         </div>
         <button id="logout-btn" class="text-gray-600 hover:text-gray-400 text-xs transition-colors hidden sm:block">Logout</button>
     `
