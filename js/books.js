@@ -90,8 +90,7 @@ function renderFiltered() {
         // read is private — only show current user's
         filtered = filtered.filter(r => r.status === 'review' || r.user_id === currentUser?.id)
     } else if (activeFilter === 'all') {
-        // review = public, read/wishlist = private (current user only)
-        filtered = filtered.filter(r => r.status === 'review' || r.user_id === currentUser?.id)
+        filtered = filtered.filter(r => r.status === 'review')
     } else if (activeFilter === 'read' || activeFilter === 'wishlist') {
         filtered = filtered.filter(r => r.status === activeFilter && r.user_id === currentUser?.id)
     } else {
