@@ -6,6 +6,7 @@ import { escapeHtml } from './utils.js'
 
 let currentUser = null
 let itineraryData = null
+let groupByCityMode = false
 
 const CATEGORY_LABELS = { stay: '🛏️ Stay', eat: '🍽️ Eat', visit: '🗺️ Visit', leisure: '🌅 Leisure' }
 
@@ -52,10 +53,27 @@ function renderHeader(itinerary) {
                 <h1 class="text-3xl font-bold">${escapeHtml(itinerary.title)}</h1>
                 ${itinerary.start_date ? `<p class="text-gray-500 text-sm mt-1">${escapeHtml(itinerary.start_date)}${itinerary.end_date ? ' → ' + escapeHtml(itinerary.end_date) : ''}</p>` : ''}
             </div>
-            ${currentUser?.id === itinerary.user_id ? `
-            <a href="/travel/itinerary-write.html?id=${escapeHtml(itinerary.id)}" class="text-sm text-gray-500 hover:text-orange-400 transition-colors flex-shrink-0">Edit</a>` : ''}
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <button id="group-by-city-btn" class="text-xs text-gray-500 hover:text-orange-400 border border-gray-700 hover:border-orange-500 px-3 py-1.5 rounded-lg transition-colors">Group by city</button>
+                ${currentUser?.id === itinerary.user_id ? `
+                <a href="/travel/itinerary-write.html?id=${escapeHtml(itinerary.id)}" class="text-sm text-gray-500 hover:text-orange-400 transition-colors">Edit</a>` : ''}
+            </div>
         </div>
     `
+    document.getElementById('group-by-city-btn')?.addEventListener('click', () => {
+        groupByCityMode = !groupByCityMode
+        const btn = document.getElementById('group-by-city-btn')
+        btn.textContent = groupByCityMode ? 'Flat view' : 'Group by city'
+        btn.classList.toggle('text-orange-400', groupByCityMode)
+        btn.classList.toggle('border-orange-500', groupByCityMode)
+        btn.classList.toggle('text-gray-500', !groupByCityMode)
+        btn.classList.toggle('border-gray-700', !groupByCityMode)
+        if (groupByCityMode) {
+            renderBodyGrouped(itineraryData.places, itineraryData.budgets)
+        } else {
+            renderBody(itineraryData.places, itineraryData.budgets)
+        }
+    })
 }
 
 function renderPlacesList(places) {
@@ -65,7 +83,11 @@ function renderPlacesList(places) {
             <span class="text-xs text-gray-600 w-5 text-center font-mono">${i + 1}</span>
             <div class="flex-1">
                 <p class="text-sm font-medium">${escapeHtml(p.name)}</p>
-                ${p.notes ? `<p class="text-xs text-gray-500 mt-0.5">${escapeHtml(p.notes)}</p>` : ''}
+                <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
+                    ${p.city ? `<span>· ${escapeHtml(p.city)}</span>` : ''}
+                    ${p.day_number ? `<span>Day ${p.day_number}</span>` : ''}
+                    ${p.notes ? `<span>${escapeHtml(p.notes)}</span>` : ''}
+                </p>
             </div>
             ${p.cost_estimate ? `<span class="text-xs text-orange-400">₹${Number(p.cost_estimate).toLocaleString()}</span>` : ''}
         </div>
@@ -78,7 +100,9 @@ function renderBody(places, budgets) {
 
     const cats = ['stay', 'eat', 'visit', 'leisure']
     document.getElementById('itinerary-body').innerHTML = cats.map(cat => {
-        const catPlaces = places.filter(p => p.category === cat)
+        const catPlaces = places
+            .filter(p => p.category === cat)
+            .sort((a, b) => (a.day_number ?? Infinity) - (b.day_number ?? Infinity))
         const budget = budgetMap[cat]
         const spent = catPlaces.reduce((sum, p) => sum + (p.cost_estimate || 0), 0)
         const canOptimize = (cat === 'visit' || cat === 'leisure') && catPlaces.some(p => p.lat != null)
@@ -122,6 +146,50 @@ function renderBody(places, budgets) {
             showToast('Route optimized 📍')
         })
     })
+}
+
+function renderBodyGrouped(places, budgets) {
+    const cityOrder = []
+    places.forEach(p => {
+        const c = p.city || 'Other'
+        if (!cityOrder.includes(c)) cityOrder.push(c)
+    })
+
+    const cats = ['stay', 'eat', 'visit', 'leisure']
+    const body = document.getElementById('itinerary-body')
+
+    body.innerHTML = cityOrder.map(city => {
+        const cityPlaces = places.filter(p => (p.city || 'Other') === city)
+            .sort((a, b) => (a.day_number ?? Infinity) - (b.day_number ?? Infinity))
+
+        const catSections = cats.map(cat => {
+            const catPlaces = cityPlaces.filter(p => p.category === cat)
+            if (!catPlaces.length) return ''
+            return `
+                <div class="mb-3">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">${CATEGORY_LABELS[cat]}</p>
+                    <div class="space-y-2">${renderPlacesList(catPlaces)}</div>
+                </div>`
+        }).join('')
+
+        return `
+        <div class="bg-gray-900/40 rounded-2xl border border-gray-800 p-5">
+            <h2 class="text-base font-bold text-orange-400 mb-4">📍 ${escapeHtml(city)}</h2>
+            ${catSections}
+        </div>`
+    }).join('')
+
+    const total = places.reduce((sum, p) => sum + (p.cost_estimate || 0), 0)
+    if (total > 0) {
+        body.insertAdjacentHTML('beforeend', `
+            <div class="bg-gray-900 rounded-2xl border border-gray-800 p-4">
+                <div class="flex justify-between font-semibold">
+                    <span class="text-gray-300">Total estimated cost</span>
+                    <span class="text-orange-400">₹${total.toLocaleString()}</span>
+                </div>
+            </div>
+        `)
+    }
 }
 
 async function init() {
