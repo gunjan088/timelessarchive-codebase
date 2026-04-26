@@ -58,13 +58,13 @@ async function init() {
             return
         }
         renderNav('food', true)
-        renderNavUser(profile.display_name, { onLogout: logoutHandler, showAddReview: true })
+        renderNavUser(profile.display_name, { onLogout: logoutHandler })
         document.getElementById('wishlist-chip')?.classList.remove('hidden')
     } else {
         renderNav('food', false)
     }
 
-    wireNavButtons()
+    wireButtons()
     await loadFeed()
     setupRealtime()
 }
@@ -186,26 +186,70 @@ async function logoutHandler() {
     renderFiltered()
 }
 
-function wireNavButtons() {
-    const btn = document.getElementById('add-review-btn')
-    if (!btn) return
-    const fresh = btn.cloneNode(true)
-    btn.parentNode.replaceChild(fresh, btn)
-    fresh.addEventListener('click', () => {
-        if (!currentUser) { showScreen('auth'); return }
-        resetModal()
-        openModal()
+let activeModalTab = 'review'
+
+function switchModalTab(tab) {
+    activeModalTab = tab
+    document.querySelectorAll('.modal-tab').forEach(btn => {
+        const isActive = btn.dataset.tab === tab
+        btn.classList.toggle('text-orange-400', isActive)
+        btn.classList.toggle('border-b-2', isActive)
+        btn.classList.toggle('border-orange-400', isActive)
+        btn.classList.toggle('-mb-px', isActive)
+        btn.classList.toggle('text-gray-500', !isActive)
     })
-    const wlBtn = document.getElementById('wishlist-add-btn')
-    if (wlBtn) {
-        const freshWl = wlBtn.cloneNode(true)
-        wlBtn.parentNode.replaceChild(freshWl, wlBtn)
-        freshWl.addEventListener('click', () => {
-            if (!currentUser) { showScreen('auth'); return }
-            openWishlistModal('food', ({ name, notes }) =>
-                insertWishlistItem({ userId: currentUser.id, category: 'food', name, notes })
-                    .then(() => { wishlistLoaded = false })
-            )
+    document.getElementById('tab-review').classList.toggle('hidden', tab !== 'review')
+    document.getElementById('tab-wishlist').classList.toggle('hidden', tab !== 'wishlist')
+}
+
+function wireButtons() {
+    // Sign In button (logged out only)
+    const signInBtn = document.getElementById('sign-in-btn')
+    if (signInBtn) {
+        signInBtn.addEventListener('click', () => showScreen('auth'))
+    }
+
+    // + Add button (always visible in filter bar)
+    const addBtn = document.getElementById('add-btn')
+    if (addBtn) {
+        const fresh = addBtn.cloneNode(true)
+        addBtn.parentNode.replaceChild(fresh, addBtn)
+        fresh.addEventListener('click', () => {
+            if (!currentUser) { showToast('Sign in to add', 'error'); return }
+            resetModal()
+            switchModalTab('review')
+            openModal()
+        })
+    }
+
+    // Modal tabs
+    document.querySelectorAll('.modal-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchModalTab(btn.dataset.tab))
+    })
+
+    // Wishlist submit
+    const wlSubmit = document.getElementById('wl-submit-btn')
+    if (wlSubmit) {
+        const fresh = wlSubmit.cloneNode(true)
+        wlSubmit.parentNode.replaceChild(fresh, wlSubmit)
+        fresh.addEventListener('click', async () => {
+            const name = document.getElementById('wl-name').value.trim()
+            if (!name) { showToast('Enter a name', 'error'); return }
+            fresh.textContent = 'Saving...'
+            fresh.disabled = true
+            try {
+                await insertWishlistItem({ userId: currentUser.id, category: 'food', name, notes: document.getElementById('wl-notes').value.trim() })
+                showToast('Added to wishlist 🔖')
+                wishlistLoaded = false
+                closeModal()
+                document.getElementById('wl-name').value = ''
+                document.getElementById('wl-notes').value = ''
+            } catch (err) {
+                showToast('Failed to save', 'error')
+            } finally {
+                fresh.textContent = 'Save to Wishlist'
+                fresh.disabled = false
+            }
         })
     }
 }
@@ -213,8 +257,8 @@ function wireNavButtons() {
 async function enterApp(displayName) {
     showScreen('app')
     renderNav('food', true)
-    renderNavUser(displayName, { onLogout: logoutHandler, showAddReview: true })
-    wireNavButtons()
+    renderNavUser(displayName, { onLogout: logoutHandler })
+    wireButtons()
     document.getElementById('wishlist-chip')?.classList.remove('hidden')
     // Only reload feed if needed (first load already happened in init)
     if (!allReviews.length) {
