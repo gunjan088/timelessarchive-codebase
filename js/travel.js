@@ -20,7 +20,7 @@ function renderPosts(posts) {
     if (!posts.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return }
     empty.classList.add('hidden')
     grid.innerHTML = posts.map(p => `
-        <a href="/travel-post.html?id=${escapeHtml(p.id)}" class="block bg-gray-900 hover:bg-gray-800/70 rounded-2xl border border-gray-800 hover:border-gray-700 p-6 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-0.5 group">
+        <a href="/travel/post.html?id=${escapeHtml(p.id)}" class="block bg-gray-900 hover:bg-gray-800/70 rounded-2xl border border-gray-800 hover:border-gray-700 p-6 transition-all duration-200 hover:shadow-2xl hover:shadow-black/40 hover:-translate-y-0.5 group">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex-1">
                     <div class="flex items-center gap-2 mb-2">
@@ -33,7 +33,7 @@ function renderPosts(posts) {
             </div>
             ${currentUser?.id === p.user_id ? `
             <div class="flex gap-3 mt-4 pt-4 border-t border-gray-800" onclick="event.stopPropagation(); event.preventDefault()">
-                <a href="/travel-write.html?id=${escapeHtml(p.id)}" class="text-xs text-gray-500 hover:text-orange-400 transition-colors">Edit</a>
+                <a href="/travel/write.html?id=${escapeHtml(p.id)}" class="text-xs text-gray-500 hover:text-orange-400 transition-colors">Edit</a>
                 <button class="delete-post-btn text-xs text-gray-500 hover:text-red-400 transition-colors" data-id="${escapeHtml(p.id)}">Delete</button>
             </div>` : ''}
         </a>
@@ -86,7 +86,7 @@ async function init() {
         const newPostBtn = document.getElementById('new-post-btn')
         if (newPostBtn) {
             newPostBtn.classList.remove('hidden')
-            newPostBtn.addEventListener('click', () => { window.location.href = '/travel-write.html' })
+            newPostBtn.addEventListener('click', () => { window.location.href = '/travel/write.html' })
         }
 
         document.getElementById('travel-wishlist-chip')?.classList.remove('hidden')

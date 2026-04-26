@@ -75,7 +75,7 @@ document.getElementById('publish-btn').addEventListener('click', async () => {
             await insertTravelPlace({ postId, ...place })
         }
         showToast('Post published! ✈️')
-        window.location.href = `/travel-post.html?id=${postId}`
+        window.location.href = `/travel/post.html?id=${postId}`
     } catch (err) {
         msg.textContent = err.message || 'Failed to publish'
         msg.classList.remove('hidden')

@@ -26,7 +26,7 @@ function renderPost(post, places, isAuthor) {
         <div class="flex items-center gap-2 mb-3 flex-wrap">
             <span class="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">📍 ${escapeHtml(post.destination)}</span>
             <span class="text-xs text-gray-600">${formatDate(post.created_at)}</span>
-            ${isAuthor ? `<a href="/travel-write.html?id=${escapeHtml(post.id)}" class="text-xs text-orange-400 hover:text-orange-300 ml-auto transition-colors">Edit</a>` : ''}
+            ${isAuthor ? `<a href="/travel/write.html?id=${escapeHtml(post.id)}" class="text-xs text-orange-400 hover:text-orange-300 ml-auto transition-colors">Edit</a>` : ''}
         </div>
         <h1 class="text-3xl font-bold mb-8 leading-tight">${escapeHtml(post.title)}</h1>
         <div class="text-gray-300 leading-8 text-[15px] whitespace-pre-wrap">${escapeHtml(post.content)}</div>
@@ -37,7 +37,7 @@ function renderPost(post, places, isAuthor) {
 async function init() {
     const params = new URLSearchParams(window.location.search)
     const id = params.get('id')
-    if (!id) { window.location.href = '/travel.html'; return }
+    if (!id) { window.location.href = '/travel/'; return }
 
     const { data: { user } } = await supabase.auth.getUser()
     renderNav('travel', !!user)
@@ -58,7 +58,7 @@ async function init() {
         document.getElementById('post-content-area').innerHTML = `
             <div class="text-center py-20">
                 <p class="text-gray-400">Post not found.</p>
-                <a href="/travel.html" class="text-orange-400 hover:text-orange-300 text-sm mt-2 inline-block">← Back to Travel</a>
+                <a href="/travel/" class="text-orange-400 hover:text-orange-300 text-sm mt-2 inline-block">← Back to Travel</a>
             </div>
         `
     }
