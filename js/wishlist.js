@@ -49,6 +49,9 @@ export function renderWishlistCards(items, container, emptyState, onMarkVisited,
                 await deleteWishlistItem(id)
                 showToast('Removed from wishlist')
                 btn.closest('.wishlist-card').remove()
+                if (!container.querySelector('.wishlist-card')) {
+                    if (emptyState) emptyState.classList.remove('hidden')
+                }
                 if (onDelete) onDelete(id)
             } catch (err) { showToast('Failed to remove', 'error') }
         })
