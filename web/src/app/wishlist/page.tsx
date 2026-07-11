@@ -1,6 +1,8 @@
 import { fetchWishlist } from '@/lib/db/wishlist'
 import WishlistGrid from '@/components/wishlist/WishlistGrid'
 
+export const dynamic = 'force-dynamic'
+
 export default async function WishlistPage({
     searchParams,
 }: {
