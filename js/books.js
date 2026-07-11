@@ -280,6 +280,16 @@ document.getElementById('wl-submit-btn').addEventListener('click', async () => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
+    // Subscribe to auth state changes so session expiry is handled reactively
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'INITIAL_SESSION') return
+        currentUser = session?.user ?? null
+        renderNav('books', !!currentUser)
+        if (currentUser) {
+            renderNavUser(currentUser.user_metadata?.display_name || currentUser.email, { onLogout: async () => { await supabase.auth.signOut(); location.reload() } })
+        }
+    })
+
     const { data: { user } } = await supabase.auth.getUser()
     currentUser = user
 

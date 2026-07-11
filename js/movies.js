@@ -278,11 +278,21 @@ function wireButtons() {
 }
 
 async function init() {
-    // 1. Resolve auth first
+    // 1. Subscribe to auth state changes so session expiry is handled reactively
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'INITIAL_SESSION') return
+        currentUser = session?.user ?? null
+        renderNav('movies', !!currentUser)
+        if (currentUser) {
+            renderNavUser(currentUser.user_metadata?.display_name || currentUser.email, { onLogout: async () => { await supabase.auth.signOut(); location.reload() } })
+        }
+    })
+
+    // 2. Resolve auth first
     const { data: { user } } = await supabase.auth.getUser()
     currentUser = user
 
-    // 2. Render nav once with correct logged-in state
+    // 3. Render nav once with correct logged-in state
     if (user) {
         renderNav('movies', true)
         const profile = await getProfile(user.id)
@@ -294,10 +304,10 @@ async function init() {
         renderNav('movies', false)
     }
 
-    // 3. Wire buttons (currentUser is now set)
+    // 4. Wire buttons (currentUser is now set)
     wireButtons()
 
-    // 4. Load data
+    // 5. Load data
     await loadFeed()
 }
 

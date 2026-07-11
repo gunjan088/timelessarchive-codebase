@@ -81,6 +81,18 @@ async function handleMarkVisited(wishlistId) {
 }
 
 async function init() {
+    // Subscribe to auth state changes so session expiry is handled reactively
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'INITIAL_SESSION') return
+        currentUser = session?.user ?? null
+        renderNav('travel', !!currentUser)
+        if (currentUser) {
+            renderNavUser(currentUser.user_metadata?.display_name || currentUser.email, {
+                onLogout: async () => { await supabase.auth.signOut(); window.location.href = '/index.html' }
+            })
+        }
+    })
+
     const { data: { user } } = await supabase.auth.getUser()
     currentUser = user
     renderNav('travel', !!user)
