@@ -47,6 +47,16 @@ function showScreen(name) {
 async function init() {
     showScreen('app')
 
+    // Subscribe to auth state changes so session expiry is handled reactively
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'INITIAL_SESSION') return
+        currentUser = session?.user ?? null
+        renderNav('food', !!currentUser)
+        if (currentUser) {
+            renderNavUser(currentUser.user_metadata?.display_name || currentUser.email, { onLogout: logoutHandler })
+        }
+    })
+
     // Resolve auth before rendering nav — prevents Add Review button from
     // briefly existing with currentUser=null and redirecting logged-in users
     const { data: { user } } = await supabase.auth.getUser()
