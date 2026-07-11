@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth'
-import { createClient } from '@/lib/supabase/client'
+import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 
 const LINKS = [
     { href: '/', label: 'Food', emoji: '🍽️' },
@@ -17,7 +17,7 @@ export default function Nav() {
     const user = useAuthStore((s) => s.user)
 
     async function handleLogout() {
-        const supabase = createClient()
+        const supabase = createBrowserSupabaseClient()
         await supabase.auth.signOut()
         router.refresh()
     }
