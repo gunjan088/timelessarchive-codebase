@@ -186,6 +186,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     btn.disabled = true
     try {
         await insertScreenReview({ userId: currentUser.id, title, type, platform, note, rating: selectedRating, genre: selectedGenre })
+        wishlistLoaded = false
         showToast('Review saved! 🎬')
         closeModal()
         document.getElementById('movie-title').value = ''
